@@ -1,0 +1,38 @@
+# platform/argus_sdk/examples/mekong_vietnam.yaml
+#
+# Vietnam Mekong Delta deployment
+# Longest upstream warning in ARGUS: ~3 weeks from Chiang Saen
+
+basin_id: mekong_vietnam
+display_name: "Mekong Delta — Vietnam"
+country: Vietnam
+
+bbox: [104.5, 8.5, 107.0, 11.5]
+languages: [vi, km, en]
+
+data_sources:
+  rainfall: open_meteo
+  gauges: vnmha              # Vietnam Met Hydro Administration
+  satellite: copernicus
+
+monsoon_months: [7, 8, 9, 10, 11]
+flash_flood_hours: 12        # Compound floods are slower
+contact_authority: vnmha@kttvqg.gov.vn
+
+causal_dag:
+  intervention_nodes:
+    - id: upstream_dam_cascade
+      description: Chinese Lancang dam cascade release
+      valid_range: [0.0, 1.0]
+      downstream_lag_minutes: 30240   # ~3 weeks
+  compound_flood_nodes:
+    - id: tidal_surge
+      description: South China Sea tidal surge
+      causal_type: AMPLIFIER
+    - id: salinity_intrusion
+      description: Seawater intrusion into delta
+      causal_type: SECONDARY_HAZARD
+
+floodledger_enabled: true
+chorus_enabled: true
+oracle_villages: auto

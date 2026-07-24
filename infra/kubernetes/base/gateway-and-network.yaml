@@ -1,0 +1,202 @@
+# ── ARGUS API Gateway (port 8000) ──────────────────────────────────
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argus-api-gateway
+  namespace: argus-prod
+  labels:
+    app: argus-api-gateway
+    tier: gateway
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: argus-api-gateway
+  template:
+    metadata:
+      labels:
+        app: argus-api-gateway
+        version: "3.0"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+    spec:
+      containers:
+        - name: api-gateway
+          image: argus/api-gateway:3.0
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          env:
+            - name: INGESTION_URL
+              value: "http://argus-ingestion:8001"
+            - name: CV_GAUGING_URL
+              value: "http://argus-cv-gauging:8002"
+            - name: FEATURE_ENGINE_URL
+              value: "http://argus-feature-engine:8003"
+            - name: PREDICTION_URL
+              value: "http://argus-prediction:8004"
+            - name: ALERT_DISPATCHER_URL
+              value: "http://argus-alert-dispatcher:8005"
+            - name: CAUSAL_ENGINE_URL
+              value: "http://argus-causal-engine:8006"
+            - name: FLOOD_LEDGER_URL
+              value: "http://argus-flood-ledger:8007"
+            - name: CHORUS_URL
+              value: "http://argus-chorus:8008"
+            - name: FEDERATED_SERVER_URL
+              value: "http://argus-federated-server:8009"
+            - name: EVACUATION_RL_URL
+              value: "http://argus-evacuation-rl:8010"
+            - name: MIRROR_URL
+              value: "http://argus-mirror:8011"
+            - name: SCARNET_URL
+              value: "http://argus-scarnet:8012"
+            - name: MODEL_MONITOR_URL
+              value: "http://argus-model-monitor:8013"
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: argus-secrets
+                  key: jwt_secret
+            - name: DEMO_MODE
+              value: "false"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: argus-api-gateway
+  namespace: argus-prod
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: nlb
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+spec:
+  type: LoadBalancer
+  selector:
+    app: argus-api-gateway
+  ports:
+    - port: 80
+      targetPort: 8000
+      name: http
+    - port: 443
+      targetPort: 8000
+      name: https
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: argus-api-gateway-hpa
+  namespace: argus-prod
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: argus-api-gateway
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+---
+# ── Network Policy: restrict inter-service traffic ─────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: argus-default-deny
+  namespace: argus-prod
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: argus-prod
+      ports:
+        - protocol: TCP
+          port: 8000
+        - protocol: TCP
+          port: 8001
+        - protocol: TCP
+          port: 8002
+        - protocol: TCP
+          port: 8003
+        - protocol: TCP
+          port: 8004
+        - protocol: TCP
+          port: 8005
+        - protocol: TCP
+          port: 8006
+        - protocol: TCP
+          port: 8007
+        - protocol: TCP
+          port: 8008
+        - protocol: TCP
+          port: 8009
+        - protocol: TCP
+          port: 8010
+        - protocol: TCP
+          port: 8011
+        - protocol: TCP
+          port: 8012
+        - protocol: TCP
+          port: 8013
+---
+# ── PodDisruptionBudget for critical services ─────────────────────
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: argus-prediction-pdb
+  namespace: argus-prod
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: argus-prediction
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: argus-alert-dispatcher-pdb
+  namespace: argus-prod
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: argus-alert-dispatcher
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: argus-api-gateway-pdb
+  namespace: argus-prod
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: argus-api-gateway

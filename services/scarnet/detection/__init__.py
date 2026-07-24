@@ -1,0 +1,1 @@
+"""ScarNet change detection module."""

@@ -1,0 +1,92 @@
+# ARGUS — Shared models package
+
+# ── Phase 1 models ──────────────────────────────────────────────────────
+from shared.models.ingestion import GaugeReading, WeatherData, CCTVFrame
+from shared.models.cv_gauging import VirtualGaugeReading
+from shared.models.feature_engine import FeatureVector, TemporalFeatures, SpatialFeatures
+from shared.models.prediction import (
+    FloodPrediction,
+    SHAPExplanation,
+    PINNSensorReading,
+    AlertPayload,
+    RiskLevel,
+)
+
+# ── Phase 2 models ──────────────────────────────────────────────────────
+from shared.models.phase2 import (
+    CausalNodeType,
+    CausalNode,
+    CausalEdge,
+    CausalDAG,
+    InterventionSpec,
+    InterventionRequest,
+    InterventionResult,
+    CausalRiskResponse,
+    DAGStructureResponse,
+    InterventionOption,
+    CounterfactualQuery,
+    CounterfactualResult,
+    TFTPrediction,
+    CommunityReport,
+    ChorusAggregation,
+    SentimentLevel,
+    FederatedRound,
+    NodeUpdate,
+    EvacuationZone,
+    EvacuationRoute,
+    EvacuationAction,
+    EvacuationPlan,
+    FloodEvent,
+    PayoutRecord,
+    IntersectedAsset,
+    DemoTriggerRequest,
+    DemoTriggerResponse,
+    LedgerEntry,
+    LedgerChain,
+)
+
+__all__ = [
+    # Phase 1
+    "GaugeReading",
+    "WeatherData",
+    "CCTVFrame",
+    "VirtualGaugeReading",
+    "FeatureVector",
+    "TemporalFeatures",
+    "SpatialFeatures",
+    "FloodPrediction",
+    "SHAPExplanation",
+    "PINNSensorReading",
+    "AlertPayload",
+    "RiskLevel",
+    # Phase 2
+    "CausalNodeType",
+    "CausalNode",
+    "CausalEdge",
+    "CausalDAG",
+    "InterventionSpec",
+    "InterventionRequest",
+    "InterventionResult",
+    "CausalRiskResponse",
+    "DAGStructureResponse",
+    "InterventionOption",
+    "CounterfactualQuery",
+    "CounterfactualResult",
+    "TFTPrediction",
+    "CommunityReport",
+    "ChorusAggregation",
+    "SentimentLevel",
+    "FederatedRound",
+    "NodeUpdate",
+    "EvacuationZone",
+    "EvacuationRoute",
+    "EvacuationAction",
+    "EvacuationPlan",
+    "FloodEvent",
+    "PayoutRecord",
+    "IntersectedAsset",
+    "DemoTriggerRequest",
+    "DemoTriggerResponse",
+    "LedgerEntry",
+    "LedgerChain",
+]

@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: argus-storm-controller
+  namespace: argus-prod
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: argus-hpa-patcher
+rules:
+- apiGroups: ["autoscaling"]
+  resources: ["horizontalpodautoscalers"]
+  verbs: ["get", "patch"]
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argus-storm-controller-binding
+subjects:
+- kind: ServiceAccount
+  name: argus-storm-controller
+  namespace: argus-prod
+roleRef:
+  kind: ClusterRole
+  name: argus-hpa-patcher
+  apiGroup: rbac.authorization.k8s.io

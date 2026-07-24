@@ -1,0 +1,58 @@
+# ── ARGUS Prometheus Configuration ─────────────────────────
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "/etc/prometheus/rules.yml"
+
+scrape_configs:
+  - job_name: "argus-gateway"
+    static_configs:
+      - targets: ["api_gateway:8000"]
+    metrics_path: /metrics
+
+  - job_name: "argus-ingestion"
+    static_configs:
+      - targets: ["ingestion:8001"]
+    metrics_path: /metrics
+
+  - job_name: "argus-cv-gauging"
+    static_configs:
+      - targets: ["cv_gauging:8002"]
+    metrics_path: /metrics
+
+  - job_name: "argus-feature-engine"
+    static_configs:
+      - targets: ["feature_engine:8003"]
+    metrics_path: /metrics
+
+  - job_name: "argus-prediction"
+    static_configs:
+      - targets: ["prediction:8004"]
+    metrics_path: /metrics
+
+  - job_name: "argus-alert-dispatcher"
+    static_configs:
+      - targets: ["alert_dispatcher:8005"]
+    metrics_path: /metrics
+
+  - job_name: "argus-causal-engine"
+    static_configs:
+      - targets: ["causal_engine:8006"]
+    metrics_path: /metrics
+
+  - job_name: "argus-chorus"
+    static_configs:
+      - targets: ["chorus:8008"]
+    metrics_path: /metrics
+
+  - job_name: "argus-notification-hub"
+    static_configs:
+      - targets: ["notification_hub:8014"]
+    metrics_path: /metrics
+
+  - job_name: "argus-multi-basin"
+    static_configs:
+      - targets: ["multi_basin:8015"]
+    metrics_path: /metrics

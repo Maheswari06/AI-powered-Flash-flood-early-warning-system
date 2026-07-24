@@ -1,0 +1,122 @@
+# ARGUS — Python Dependencies
+
+# Core
+fastapi>=0.110,<1.0
+uvicorn[standard]>=0.27,<1.0
+pydantic>=2.5,<3.0
+python-dotenv>=1.0,<2.0
+httpx>=0.27,<1.0
+structlog>=24.1,<25.0
+
+# Kafka
+confluent-kafka>=2.3,<3.0
+
+# ML / Prediction
+xgboost>=2.0,<3.0
+shap>=0.44,<1.0
+numpy>=1.26,<2.0
+scikit-learn>=1.4,<2.0
+
+# CV / Computer Vision (Rogesh's services)
+# ultralytics>=8.1
+# segment-anything
+# opencv-python>=4.9
+
+# PINN / Virtual Sensor Mesh + Causal GNN
+torch>=2.2,<3.0
+
+# TimescaleDB / PostgreSQL
+asyncpg>=0.29,<1.0
+
+# Signal processing
+scipy>=1.12,<2.0
+
+# Prediction fast-track
+joblib>=1.3,<2.0
+pandas>=2.1,<3.0
+redis>=5.0,<6.0
+
+# ACN Node (offline edge)
+playsound>=1.3,<2.0
+# twilio>=9.0,<10.0  # optional — uncomment for IVR calls
+
+# ── Phase 2 ──────────────────────────────────────────────
+
+# Causal Engine — GNN (optional, NumPy SEM fallback exists)
+# torch-geometric>=2.5,<3.0  # optional — uncomment if CUDA available
+
+# Evacuation RL
+gymnasium>=0.29,<1.0
+# stable-baselines3>=2.2,<3.0  # optional — heuristic fallback exists
+
+# Federated Learning (Flower — base64 weight transport fallback over HTTP)
+# flwr already listed below in Phase 2 section
+
+# CHORUS NLP (full Whisper + IndicBERT pipeline)
+# deps listed below in Phase 2 section
+
+# MIRROR hydrological sim (uses numpy + scipy)
+# No extra deps
+
+# Phase 2: Causal GNN (PyTorch Geometric)
+# torch-geometric>=2.5
+networkx>=3.2,<4.0
+
+# Phase 2: FloodLedger Oracle (blockchain)
+web3>=6.15,<7.0
+
+# Phase 2: Intersection detection (geospatial)
+shapely>=2.0,<3.0
+# geopandas>=0.14   # optional — heavy dependency
+
+# Phase 2: CHORUS NLP pipeline (Sabarish rewrite)
+# openai-whisper>=20231117   # optional — keyword fallback exists
+transformers>=4.37,<5.0     # IndicBERT classifier
+pygeohash>=2.0,<3.0         # geohash spatial binning
+python-multipart>=0.0.9     # form data parsing (Twilio webhook)
+# twilio>=9.0,<10.0         # optional — TwiML responses only need XML
+
+# Phase 2: Federated Learning (Flower framework)
+flwr>=1.7,<2.0              # Flower federated learning
+# grpcio>=1.60              # pulled in by flwr
+
+# Phase 2: TFT Deep Track (multi-horizon prediction)
+# pytorch-forecasting>=1.0  # optional — synthetic fallback exists
+# pytorch-lightning>=2.1    # optional — required for TFT checkpoint
+
+# Phase 3: Model Monitor
+evidently>=0.4,<1.0
+# mlflow>=2.10,<3.0  # optional — heavy dependency
+apscheduler>=3.10,<4.0
+
+# Phase 3: Demo Orchestrator
+rich>=13.7,<14.0
+typer>=0.9,<1.0
+
+# Phase 3: Load testing (optional)
+# locust>=2.24,<3.0
+# reportlab>=4.1,<5.0
+
+# Phase 2: Evacuation RL (PettingZoo multi-agent)
+pettingzoo>=1.24,<2.0       # multi-agent environment
+# stable-baselines3>=2.2    # optional — rule-based fallback exists
+
+# Phase 2: MIRROR PDF reports
+reportlab>=4.1,<5.0         # NDMA-format PDF generation
+
+# ── Phase 3 ──────────────────────────────────────────────
+
+# ScarNet — Satellite terrain change detection
+# rasterio>=1.3,<2.0       # optional — numpy fallback for tile I/O
+# geopandas>=0.14           # optional — heavy geospatial dependency
+scikit-image>=0.22,<1.0     # image processing (resize, morphology)
+
+# API Gateway
+# fastapi-cache2>=0.2       # optional — using built-in SimpleCache
+
+# Load testing
+locust>=2.20,<3.0           # load/stress testing framework
+
+# Integration testing
+pytest>=8.0,<9.0            # test framework
+pytest-asyncio>=0.23,<1.0   # async test support

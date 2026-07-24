@@ -1,0 +1,51 @@
+{
+    "node_id": "himachal",
+    "node_name": "Himachal Pradesh ACN",
+    "region": "Kullu-Manali, Himachal Pradesh",
+    "description": "Mountain flash-flood station — steep terrain, rapid rate-of-change sensitivity",
+
+    "oracle_model": "oracle_himachal.tflite",
+    "oracle_fallback": "xgboost_himachal.joblib",
+
+    "warning_threshold": 0.60,
+    "emergency_threshold": 0.82,
+    "advisory_threshold": 0.40,
+
+    "poll_interval_sec": 30,
+    "max_cache_readings": 500,
+
+    "sensor": {
+        "type": "pressure_level",
+        "unit": "meters",
+        "normal_range": [1.0, 3.0],
+        "danger_level_m": 4.5,
+        "highest_flood_level_m": 6.8
+    },
+
+    "escalation": {
+        "lora_siren_enabled": true,
+        "twilio_enabled": false,
+        "cell_broadcast_sim": true,
+        "siren_duration_sec": 10,
+        "cooldown_sec": 300,
+        "alert_phones": ["+919123456789", "+919123456780"]
+    },
+
+    "cloud_sync": {
+        "enabled": true,
+        "endpoint": "http://prediction:8004/api/v1/prediction/VIL-HP-MANDI",
+        "sync_interval_sec": 60,
+        "retry_max": 3
+    },
+
+    "demo": {
+        "duration_sec": 300,
+        "trigger_at_sec": 120,
+        "start_level_m": 1.8,
+        "peak_level_m": 5.5,
+        "rainfall_start_mm": 2.0,
+        "rainfall_peak_mm": 110.0,
+        "soil_moisture_start": 0.30,
+        "soil_moisture_peak": 0.88
+    }
+}

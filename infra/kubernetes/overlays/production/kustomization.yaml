@@ -1,0 +1,13 @@
+# ── Production Overlay ─────────────────────────────────────────────
+# Multi-AZ, full resources, DEMO_MODE=false, all features enabled
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: argus-prod
+
+bases:
+  - ../../base
+
+patchesStrategicMerge:
+  - config-patch.yaml
+  - topology-patch.yaml

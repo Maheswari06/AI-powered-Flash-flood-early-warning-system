@@ -1,0 +1,14 @@
+# Override config for dev environment
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argus-config
+  namespace: argus-dev
+data:
+  kafka_bootstrap_servers: "localhost:9092"
+  timescale_host: "localhost"
+  redis_url: "redis://localhost:6379"
+  demo_mode: "true"
+  tft_enabled: "false"
+  log_level: "DEBUG"
+  environment: "development"

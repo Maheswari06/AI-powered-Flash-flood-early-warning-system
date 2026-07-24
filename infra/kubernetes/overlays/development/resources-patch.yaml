@@ -1,0 +1,58 @@
+# Reduce resource requests/limits for dev
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argus-prediction
+  namespace: argus-dev
+spec:
+  template:
+    spec:
+      containers:
+        - name: prediction
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argus-causal-engine
+  namespace: argus-dev
+spec:
+  template:
+    spec:
+      nodeSelector: {}
+      tolerations: []
+      containers:
+        - name: causal-engine
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+              nvidia.com/gpu: "0"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+              nvidia.com/gpu: "0"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argus-mirror
+  namespace: argus-dev
+spec:
+  template:
+    spec:
+      containers:
+        - name: mirror
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"

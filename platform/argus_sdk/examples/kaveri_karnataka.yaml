@@ -1,0 +1,45 @@
+# platform/argus_sdk/examples/kaveri_karnataka.yaml
+#
+# Example ARGUS SDK basin configuration for Kaveri River
+# Deploy with:
+#   from argus import Basin, ARGUSDeployment
+#   basin = Basin.from_config("kaveri_karnataka.yaml")
+#   ARGUSDeployment(basin).train_models()
+
+basin_id: kaveri_karnataka
+display_name: "Kaveri River — Karnataka & Tamil Nadu"
+country: India
+states:
+  - Karnataka
+  - Tamil Nadu
+
+bbox: [75.0, 10.5, 79.5, 14.0]
+languages: [kn, ta, hi, en]
+
+data_sources:
+  rainfall: open_meteo       # Free — no key needed
+  gauges: cwc_wris           # Free — register at indiawris.gov.in
+  satellite: copernicus      # Free — register at dataspace.copernicus.eu
+
+monsoon_months: [6, 7, 8, 9, 10]
+flash_flood_hours: 4
+contact_authority: ksndmc@karnataka.gov.in
+
+causal_dag:
+  intervention_nodes:
+    - id: krishnaraja_sagar_gate
+      description: KRS Dam gate opening (fraction)
+      valid_range: [0.0, 1.0]
+      downstream_lag_minutes: 90
+    - id: kabini_reservoir_gate
+      description: Kabini Dam discharge
+      valid_range: [0.0, 1.0]
+      downstream_lag_minutes: 120
+
+insurance_partners:
+  - INSURER_ICICI
+  - INSURER_ORIENTAL
+
+floodledger_enabled: true
+chorus_enabled: true
+oracle_villages: auto   # Auto-detect from admin boundary shapefile

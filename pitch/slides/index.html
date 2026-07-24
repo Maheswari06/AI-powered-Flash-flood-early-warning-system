@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920, height=1080">
+<title>ARGUS — Pitch Deck</title>
+<style>
+/* ── ARGUS Visual Language ──────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+:root {
+  --bg:       #050d1a;
+  --cyan:     #00c9ff;
+  --emerald:  #10b981;
+  --red:      #ef4444;
+  --grey:     #6B7280;
+  --white:    #f1f5f9;
+  --panel:    rgba(5, 13, 26, 0.85);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Exo 2', sans-serif;
+  overflow: hidden;
+}
+
+/* ── Slide Container ─────────────────────────────────────── */
+.deck {
+  width: 1920px; height: 1080px;
+  position: relative;
+  transform-origin: top left;
+}
+
+.slide {
+  width: 1920px; height: 1080px;
+  position: absolute; top: 0; left: 0;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 80px;
+  background: var(--bg);
+  overflow: hidden;
+}
+.slide.active { display: flex; }
+
+/* ── Typography ──────────────────────────────────────────── */
+h1, h2, h3, .rajdhani { font-family: 'Rajdhani', sans-serif; }
+.exo { font-family: 'Exo 2', sans-serif; }
+
+.accent  { color: var(--cyan); }
+.green   { color: var(--emerald); }
+.red     { color: var(--red); }
+.muted   { color: var(--grey); }
+.white   { color: var(--white); }
+.bold    { font-weight: 700; }
+.italic  { font-style: italic; }
+
+.text-72 { font-size: 72px; } .text-96 { font-size: 96px; }
+.text-48 { font-size: 48px; } .text-36 { font-size: 36px; }
+.text-24 { font-size: 24px; } .text-18 { font-size: 18px; }
+.text-14 { font-size: 14px; } .text-11 { font-size: 11px; }
+.text-center { text-align: center; }
+.text-left   { text-align: left; }
+
+/* ── Layout helpers ──────────────────────────────────────── */
+.row  { display: flex; flex-direction: row;    align-items: center; }
+.col  { display: flex; flex-direction: column; align-items: center; }
+.gap-sm  { gap: 16px; } .gap-md { gap: 32px; } .gap-lg { gap: 64px; }
+.gap-xl  { gap: 96px; }
+.w-full  { width: 100%; }
+.h-full  { height: 100%; }
+.flex-1  { flex: 1; }
+.justify-center  { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.items-start     { align-items: flex-start; }
+.items-center    { align-items: center; }
+.relative { position: relative; }
+.absolute { position: absolute; }
+.mt-auto  { margin-top: auto; }
+.mb-auto  { margin-bottom: auto; }
+
+/* ── Decorative ──────────────────────────────────────────── */
+.divider-v {
+  width: 3px; height: 260px;
+  background: linear-gradient(180deg, transparent, var(--cyan), transparent);
+}
+.divider-h {
+  height: 2px; width: 100%;
+  background: linear-gradient(90deg, transparent, var(--cyan) 30%, var(--cyan) 70%, transparent);
+  margin: 24px 0;
+}
+
+.stat-box {
+  padding: 24px 40px;
+  border: 1px solid rgba(0,201,255,0.3);
+  border-radius: 12px;
+  text-align: center;
+  background: rgba(0,201,255,0.05);
+}
+.stat-box.red-box   { border-color: rgba(239,68,68,0.4); background: rgba(239,68,68,0.05); }
+.stat-box.green-box { border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.05); }
+
+.bottom-panel {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: var(--panel);
+  padding: 28px 80px;
+  text-align: center;
+}
+
+.grid-bg {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,201,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,201,255,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+.circuit-bg {
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(0,201,255,0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(16,185,129,0.03) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.table-clean {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 17px;
+}
+.table-clean th, .table-clean td {
+  padding: 16px 24px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.table-clean th {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 19px;
+  color: var(--cyan);
+  border-bottom: 2px solid rgba(0,201,255,0.3);
+}
+.table-clean td.argus-col {
+  color: var(--cyan);
+  font-weight: 600;
+}
+.table-clean tr:hover { background: rgba(0,201,255,0.03); }
+
+.icon-card {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 12px;
+  width: 280px; padding: 32px 16px;
+  border: 1px solid rgba(0,201,255,0.15);
+  border-radius: 16px;
+  background: rgba(0,201,255,0.03);
+}
+.icon-card .emoji { font-size: 56px; }
+.icon-card .label { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 22px; color: var(--cyan); }
+.icon-card .desc  { font-size: 13px; color: var(--grey); text-align: center; line-height: 1.5; }
+
+.revenue-circle {
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  border: 2px solid var(--cyan);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-family: 'Rajdhani', sans-serif;
+  background: rgba(0,201,255,0.04);
+}
+.revenue-circle .amount { font-size: 28px; font-weight: 700; color: var(--cyan); }
+.revenue-circle .type   { font-size: 14px; color: var(--grey); text-align: center; padding: 0 16px; }
+
+.timeline-item {
+  padding: 20px 0 20px 40px;
+  border-left: 3px solid var(--cyan);
+  position: relative;
+}
+.timeline-item::before {
+  content: ''; position: absolute; left: -8px; top: 24px;
+  width: 13px; height: 13px; border-radius: 50%;
+  background: var(--cyan);
+}
+.timeline-item .year { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 22px; color: var(--cyan); }
+.timeline-item .goal { font-size: 15px; color: var(--grey); margin-top: 4px; }
+
+.flow-step {
+  padding: 18px 28px;
+  border: 1px solid rgba(0,201,255,0.25);
+  border-radius: 10px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  background: rgba(0,201,255,0.05);
+}
+.flow-arrow { font-size: 28px; color: var(--cyan); }
+
+/* ── Animated wave for Slide 3 ───────────────────────────── */
+.wave-container {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 120px;
+  overflow: hidden; opacity: 0.15;
+}
+.wave {
+  position: absolute; bottom: -20px; width: 200%; height: 100px;
+  background: repeating-linear-gradient(90deg, transparent, transparent 50px, var(--cyan) 50px, var(--cyan) 51px);
+  animation: wave-move 8s linear infinite;
+  border-radius: 40%;
+}
+@keyframes wave-move {
+  0%   { transform: translateX(0) scaleY(1); }
+  50%  { transform: translateX(-25%) scaleY(0.6); }
+  100% { transform: translateX(-50%) scaleY(1); }
+}
+
+/* ── Slide number ────────────────────────────────────────── */
+.slide-num {
+  position: absolute; bottom: 28px; right: 48px;
+  font-family: 'Rajdhani', sans-serif; font-size: 16px;
+  color: rgba(255,255,255,0.2);
+}
+
+/* ── Navigation ──────────────────────────────────────────── */
+.nav {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 8px; z-index: 999;
+  background: rgba(5,13,26,0.9); padding: 8px 16px;
+  border-radius: 20px; border: 1px solid rgba(0,201,255,0.2);
+}
+.nav-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(255,255,255,0.15); cursor: pointer;
+  transition: all 0.3s;
+}
+.nav-dot.active { background: var(--cyan); transform: scale(1.4); }
+.nav-dot:hover  { background: rgba(0,201,255,0.5); }
+
+/* Print / PDF */
+@media print {
+  .nav { display: none; }
+  .slide { display: flex !important; page-break-after: always; position: relative; }
+  body { overflow: visible; }
+}
+
+/* Responsive scaling */
+@media screen {
+  .deck {
+    transform: scale(var(--scale, 1));
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 1 — TITLE                                            -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="slide active" id="s1">
+  <div class="circuit-bg"></div>
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%, rgba(0,201,255,0.06) 0%, transparent 60%);"></div>
+
+  <div class="col gap-md items-center" style="z-index:1;">
+    <div class="rajdhani bold text-72 accent" style="letter-spacing:12px;">ARGUS</div>
+    <div class="exo text-24 white" style="letter-spacing:3px; opacity:0.85;">
+      Adaptive Real-time Guardian &amp; Unified Sentinel
+    </div>
+    <div class="divider-h" style="width:400px; margin: 20px 0;"></div>
+    <div class="exo text-18 muted">
+      AI-Powered Flash Flood Early Warning System
+    </div>
+  </div>
+
+  <div class="absolute" style="bottom:48px; right:80px; text-align:right; z-index:1;">
+    <div class="exo text-14 muted">Rogesh · Sabarish · Dhanalakshmi</div>
+    <div class="exo text-14 muted" style="margin-top:4px;">ARGUS Team — 2026</div>
+  </div>
+  <div class="absolute" style="bottom:48px; left:80px; z-index:1;">
+    <div class="rajdhani bold text-24 accent" style="opacity:0.6;">◈</div>
+  </div>
+  <div class="absolute" style="bottom:28px; left:50%; transform:translateX(-50%); z-index:1;">
+    <div class="exo text-14 italic muted">
+      "Every sensor can break. Every tower can fall. ARGUS cannot be blinded."
+    </div>
+  </div>
+  <span class="slide-num">1 / 14</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 2 — THE PROBLEM (The Gap Slide)                      -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s2">
+  <div class="grid-bg"></div>
+
+  <div class="row gap-xl items-center" style="z-index:1;">
+    <div class="col gap-sm items-center flex-1">
+      <div class="rajdhani bold text-96 red">8 minutes</div>
+      <div class="exo text-24 white">The warning you get today.</div>
+    </div>
+    <div class="divider-v"></div>
+    <div class="col gap-sm items-center flex-1">
+      <div class="rajdhani bold text-96 green">90 minutes</div>
+      <div class="exo text-24 white">The time you need to evacuate safely.</div>
+    </div>
+  </div>
+
+  <div class="bottom-panel">
+    <div class="exo text-18 white">
+      71 people died in Himachal Pradesh on August 14, 2023.<br>
+      The first official warning arrived <span class="red bold">8 minutes</span> before the flood.
+    </div>
+  </div>
+  <span class="slide-num">2 / 14</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 3 — THE INSIGHT                                      -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s3">
+  <div class="col gap-lg items-center text-center" style="z-index:1;">
+    <div class="rajdhani text-36 white">Every flood system predicts when the flood arrives.</div>
+    <div class="rajdhani bold text-48 accent">ARGUS decides what to do about it.</div>
+  </div>
+  <div class="wave-container">
+    <div class="wave"></div>
+  </div>
+  <span class="slide-num">3 / 14</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 4 — THE BACKTEST TIMELINE                            -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s4">
+  <div class="grid-bg"></div>
+
+  <div class="col gap-md w-full" style="z-index:1; max-width:1600px;">
+    <div class="exo text-14 muted text-center" style="letter-spacing:2px;">WHAT SHOULD HAVE HAPPENED</div>
+
+    <div style="width:100%; height:520px; background:rgba(0,201,255,0.02); border:1px solid rgba(0,201,255,0.1); border-radius:16px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden;">
+      <!-- Embedded backtest timeline visualization -->
+      <div class="col gap-md items-center w-full" style="padding:40px;">
+        <!-- Official timeline -->
+        <div style="width:90%; position:relative;">
+          <div class="exo text-14 muted" style="margin-bottom:8px;">Official Response — Himachal Pradesh, Aug 14, 2023</div>
+          <div style="width:100%; height:48px; background:rgba(239,68,68,0.08); border-radius:8px; border:1px solid rgba(239,68,68,0.2); position:relative;">
+            <div style="position:absolute; right:6%; top:50%; transform:translateY(-50%); width:4%; height:32px; background:rgba(239,68,68,0.4); border-radius:4px; display:flex; align-items:center; justify-content:center;">
+              <span class="rajdhani bold" style="font-size:11px; color:var(--red);">8m</span>
+            </div>
+            <div style="position:absolute; right:0; top:50%; transform:translateY(-50%); width:24px; height:48px; background:var(--red); border-radius:0 8px 8px 0; display:flex; align-items:center; justify-content:center;">
+              <span style="font-size:14px;">🌊</span>
+            </div>
+            <div class="exo" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); font-size:13px; color:var(--grey);">No detection · No alert · No evacuation · CWC sensor offline</div>
+          </div>
+        </div>
+
+        <div style="width:90%; height:1px; background:rgba(255,255,255,0.06);"></div>
+
+        <!-- ARGUS timeline -->
+        <div style="width:90%; position:relative;">
+          <div class="exo text-14 accent" style="margin-bottom:8px;">ARGUS Simulated Response</div>
+          <div style="width:100%; height:180px; background:rgba(0,201,255,0.03); border-radius:8px; border:1px solid rgba(0,201,255,0.15); position:relative;">
+            <!-- T-180: CV Detection -->
+            <div style="position:absolute; left:2%; top:12px; bottom:12px; width:6%; background:rgba(0,201,255,0.15); border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;">
+              <span style="font-size:18px;">👁</span>
+              <span class="rajdhani bold" style="font-size:11px; color:var(--cyan);">T-180m</span>
+              <span class="exo" style="font-size:9px; color:var(--grey);">CV Detect</span>
+            </div>
+            <!-- T-120: Causal -->
+            <div style="position:absolute; left:18%; top:12px; bottom:12px; width:6%; background:rgba(0,201,255,0.12); border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;">
+              <span style="font-size:18px;">🧠</span>
+              <span class="rajdhani bold" style="font-size:11px; color:var(--cyan);">T-120m</span>
+              <span class="exo" style="font-size:9px; color:var(--grey);">Causal AI</span>
+            </div>
+            <!-- T-78: Alert -->
+            <div style="position:absolute; left:38%; top:12px; bottom:12px; width:6%; background:rgba(16,185,129,0.15); border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;">
+              <span style="font-size:18px;">🚨</span>
+              <span class="rajdhani bold" style="font-size:11px; color:var(--emerald);">T-78m</span>
+              <span class="exo" style="font-size:9px; color:var(--grey);">Alert Sent</span>
+            </div>
+            <!-- T-60: Evacuation -->
+            <div style="position:absolute; left:52%; top:12px; bottom:12px; width:6%; background:rgba(16,185,129,0.12); border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;">
+              <span style="font-size:18px;">🚌</span>
+              <span class="rajdhani bold" style="font-size:11px; color:var(--emerald);">T-60m</span>
+              <span class="exo" style="font-size:9px; color:var(--grey);">Evacuate</span>
+            </div>
+            <!-- T-45: CHORUS -->
+            <div style="position:absolute; left:64%; top:12px; bottom:12px; width:6%; background:rgba(16,185,129,0.10); border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;">
+              <span style="font-size:18px;">🗣</span>
+              <span class="rajdhani bold" style="font-size:11px; color:var(--emerald);">T-45m</span>
+              <span class="exo" style="font-size:9px; color:var(--grey);">CHORUS</span>
+            </div>
+            <!-- T-30: Dam Intervention -->
+            <div style="position:absolute; left:76%; top:12px; bottom:12px; width:6%; background:rgba(0,201,255,0.10); border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;">
+              <span style="font-size:18px;">🏗</span>
+              <span class="rajdhani bold" style="font-size:11px; color:var(--cyan);">T-30m</span>
+              <span class="exo" style="font-size:9px; color:var(--grey);">Dam Gate</span>
+            </div>
+            <!-- Flood impact (reduced) -->
+            <div style="position:absolute; right:0; top:0; bottom:0; width:28px; background:rgba(16,185,129,0.3); border-radius:0 8px 8px 0; display:flex; align-items:center; justify-content:center;">
+              <span style="font-size:14px;">🛡</span>
+            </div>
+            <!-- Arrow line -->
+            <div style="position:absolute; left:10%; right:5%; top:50%; height:2px; background:linear-gradient(90deg, var(--cyan), var(--emerald)); opacity:0.3;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row gap-lg justify-center" style="margin-top:16px;">
+      <div class="stat-box red-box">
+        <div class="rajdhani bold text-36 red">8 min</div>
+        <div class="exo text-14 muted">Official Warning</div>
+      </div>
+      <div class="stat-box">
+        <div class="rajdhani bold text-36 accent">78 min</div>
+        <div class="exo text-14 muted">ARGUS Warning</div>
+      </div>
+      <div class="stat-box green-box">
+        <div class="rajdhani bold text-36 green">40–47</div>
+        <div class="exo text-14 muted">Lives Saved</div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">4 / 14</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 5 — THE FIVE INNOVATIONS                             -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s5">
+  <div class="grid-bg"></div>
+
+  <div class="col gap-lg items-center" style="z-index:1;">
+    <div class="rajdhani bold text-36 accent">Five Core Innovations</div>
+
+    <div class="row gap-md">
+      <div class="icon-card">
+        <div class="emoji">👁</div>
+        <div class="label">CV Virtual Gauging</div>
+        <div class="desc">Traffic cameras become calibrated river gauges. YOLO v11 + SAM2 segmentation. Zero new hardware.</div>
+      </div>
+      <div class="icon-card">
+        <div class="emoji">🧠</div>
+        <div class="label">Temporal Causal AI</div>
+        <div class="desc">GNN do-calculus intervention engine. Not correlation — provable causation with dam/sluice control.</div>
+      </div>
+      <div class="icon-card">
+        <div class="emoji">📡</div>
+        <div class="label">Offline Edge Mesh</div>
+        <div class="desc">ACN crisis nodes run autonomously when towers fall. Village AI on ₹5,000 hardware.</div>
+      </div>
+      <div class="icon-card">
+        <div class="emoji">🗣</div>
+        <div class="label">CHORUS Community</div>
+        <div class="desc">WhatsApp + voice in 12 Indian languages. Credibility scoring. Zero internet needed.</div>
+      </div>
+      <div class="icon-card">
+        <div class="emoji">🔗</div>
+        <div class="label">FloodLedger Oracle</div>
+        <div class="desc">Parametric insurance via smart contract. Satellite confirms, payout executes. No adjuster.</div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">5 / 14</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 6 — ARCHITECTURE                                     -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s6">
+  <div class="grid-bg"></div>
+
+  <div class="col gap-lg items-center w-full" style="z-index:1; max-width:1500px;">
+    <div class="rajdhani bold text-36 accent">System Architecture</div>
+    <div class="exo text-18 muted">14 microservices · 5 AI models · 0 new hardware required</div>
+
+    <!-- 4-layer architecture -->
+    <div class="col gap-sm w-full" style="max-width:1300px;">
+      <!-- Data Layer -->
+      <div style="background:rgba(0,201,255,0.06); border:1px solid rgba(0,201,255,0.2); border-radius:12px; padding:20px 32px;">
+        <div class="rajdhani bold text-18 accent" style="margin-bottom:8px;">DATA LAYER</div>
+        <div class="row gap-md" style="flex-wrap:wrap;">
+          <span class="exo text-14 muted" style="padding:6px 14px; background:rgba(0,201,255,0.08); border-radius:6px;">Ingestion (8001)</span>
+          <span class="exo text-14 muted" style="padding:6px 14px; background:rgba(0,201,255,0.08); border-radius:6px;">CV Gauging (8002)</span>
+          <span class="exo text-14 muted" style="padding:6px 14px; background:rgba(0,201,255,0.08); border-radius:6px;">CHORUS (8008)</span>
+          <span class="exo text-14 muted" style="padding:6px 14px; background:rgba(0,201,255,0.08); border-radius:6px;">ScarNet (8012)</span>
+        </div>
+      </div>
+      <!-- AI Layer -->
+      <div style="background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.2); border-radius:12px; padding:20px 32px;">
+        <div class="rajdhani bold text-18 green" style="margin-bottom:8px;">AI LAYER</div>
+        <div class="row gap-md" style="flex-wrap:wrap;">
+          <span class="exo text-14 muted" style="padding:6px 14px; background:rgba(16,185,129,0.08); border-radius:6px;">Feature Engine (8003)</span>
+          <span class="exo text-14 muted" style="padding:6px 14px; background:rgba(16,185,129,0.08); border-radius:6px;">Prediction (8004)</span>
+          <span class="exo text-14 muted" style="padding:6px 14px; background:rgba(16,185,129,0.08); border-radius:6px;">Causal Engine (8006)</span>
+          <span class="exo text-14 muted" style="padding:6px 14px; background:rgba(16,185,129,0.08); border-radius:6px;">Model Monitor (8013)</span>
+          <span class="exo text-14 muted" style="padding:6px 14px; background:rgba(16,185,129,0.08); border-radius:6px;">Federated Learning (8009)</span>
+        </div>
+      </div>
+      <!-- Decision Layer -->
+      <div style="background:rgba(251,191,36,0.06); border:1px solid rgba(251,191,36,0.2); border-radius:12px; padding:20px 32px;">
+        <div class="rajdhani bold text-18" style="color:#fbbf24; margin-bottom:8px;">DECISION LAYER</div>
+        <div class="row gap-md" style="flex-wrap:wrap;">
+          <span class="exo text-14 muted" style="padding:6px 14px; background:rgba(251,191,36,0.08); border-radius:6px;">Evacuation RL (8010)</span>
+          <span class="exo text-14 muted" style="padding:6px 14px; background:rgba(251,191,36,0.08); border-radius:6px;">MIRROR (8011)</span>
+          <span class="exo text-14 muted" style="padding:6px 14px; background:rgba(251,191,36,0.08); border-radius:6px;">FloodLedger (8007)</span>
+        </div>
+      </div>
+      <!-- Alert Layer -->
+      <div style="background:rgba(239,68,68,0.06); border:1px solid rgba(239,68,68,0.2); border-radius:12px; padding:20px 32px;">
+        <div class="rajdhani bold text-18 red" style="margin-bottom:8px;">ALERT LAYER</div>
+        <div class="row gap-md" style="flex-wrap:wrap;">
+          <span class="exo text-14 muted" style="padding:6px 14px; background:rgba(239,68,68,0.08); border-radius:6px;">Alert Dispatcher (8005)</span>
+          <span class="exo text-14 muted" style="padding:6px 14px; background:rgba(239,68,68,0.08); border-radius:6px;">ACN Edge Mesh (8006)</span>
+          <span class="exo text-14 muted" style="padding:6px 14px; background:rgba(239,68,68,0.08); border-radius:6px;">API Gateway (8000)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">6 / 14</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 7 — CV VIRTUAL GAUGING                               -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s7">
+  <div class="circuit-bg"></div>
+
+  <div class="col gap-lg items-center w-full" style="z-index:1; max-width:1400px;">
+    <div class="rajdhani bold text-36 accent">CV Virtual Gauging — Demo Preview</div>
+
+    <div style="width:100%; height:520px; background:rgba(0,201,255,0.03); border:1px solid rgba(0,201,255,0.15); border-radius:16px; position:relative; overflow:hidden;">
+      <!-- Simulated camera view -->
+      <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;">
+        <div class="col gap-md items-center">
+          <div style="font-size:80px;">🌉</div>
+          <div class="rajdhani bold text-24 white">Bridge Camera Feed — Beas River, Kullu</div>
+          <div class="row gap-lg" style="margin-top:24px;">
+            <div class="stat-box">
+              <div class="rajdhani bold text-36 accent">2.3m</div>
+              <div class="exo text-14 muted">Water Depth ↑</div>
+            </div>
+            <div class="stat-box red-box">
+              <div class="rajdhani bold text-36 red">+340%</div>
+              <div class="exo text-14 muted">Velocity Change</div>
+            </div>
+            <div class="stat-box green-box">
+              <div class="rajdhani bold text-36 green">94.2%</div>
+              <div class="exo text-14 muted">Confidence</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- YOLO overlay indicators -->
+      <div style="position:absolute; top:16px; left:16px; padding:8px 16px; background:rgba(239,68,68,0.2); border:1px solid var(--red); border-radius:8px;">
+        <span class="rajdhani bold text-14 red">⚠ ALERT: WARNING</span>
+      </div>
+      <div style="position:absolute; top:16px; right:16px; padding:8px 16px; background:rgba(0,201,255,0.1); border:1px solid rgba(0,201,255,0.3); border-radius:8px;">
+        <span class="exo text-14 accent">YOLO v11 + SAM2 Active</span>
+      </div>
+    </div>
+
+    <div class="row gap-md items-center">
+      <div class="exo text-18 white">Traffic camera → Calibrated river gauge</div>
+      <div style="padding:8px 20px; background:var(--cyan); border-radius:8px; color:var(--bg); font-family:'Rajdhani',sans-serif; font-weight:700;">
+        LIVE DEMO →
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">7 / 14</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 8 — CAUSAL INTERVENTION                              -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s8">
+  <div class="grid-bg"></div>
+
+  <div class="col gap-lg items-center w-full" style="z-index:1; max-width:1400px;">
+    <div class="rajdhani bold text-36 accent">Causal Intervention Engine</div>
+    <div class="rajdhani bold text-24 white">The only flood system with a causal intervention API.</div>
+
+    <div class="row gap-xl items-center" style="margin-top:24px;">
+      <div class="stat-box red-box" style="min-width:200px;">
+        <div class="rajdhani bold text-48 red">4.7m</div>
+        <div class="exo text-14 muted">Predicted Depth</div>
+        <div class="exo text-11 muted">(without intervention)</div>
+      </div>
+      <div style="font-size:48px; color:var(--cyan);">→</div>
+      <div class="stat-box" style="min-width:200px;">
+        <div class="rajdhani bold text-48 accent">3.1m</div>
+        <div class="exo text-14 muted">After Intervention</div>
+        <div class="exo text-11 muted">(dam gate open 25%)</div>
+      </div>
+      <div style="font-size:48px; color:var(--emerald);">→</div>
+      <div class="stat-box green-box" style="min-width:200px;">
+        <div class="rajdhani bold text-48 green">34%</div>
+        <div class="exo text-14 muted">Damage Reduction</div>
+        <div class="exo text-11 muted">(provable, not estimated)</div>
+      </div>
+    </div>
+
+    <div style="margin-top:32px; padding:20px 40px; background:rgba(0,201,255,0.04); border:1px solid rgba(0,201,255,0.15); border-radius:12px;">
+      <div class="exo text-14 muted" style="font-family:monospace; letter-spacing:1px;">
+        P(Y | do(X = dam_gate_25%)) = Σ P(Y | X, Z) · P(Z) &nbsp;&nbsp;—&nbsp; Judea Pearl, do-calculus
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">8 / 14</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 9 — OFFLINE RESILIENCE                               -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s9">
+  <div class="circuit-bg"></div>
+
+  <div class="col gap-lg items-center w-full" style="z-index:1; max-width:1500px;">
+    <div class="rajdhani bold text-36 accent">Offline Resilience</div>
+
+    <div class="row gap-xl items-center w-full">
+      <!-- LEFT: WiFi off -->
+      <div class="col gap-md items-center flex-1" style="padding:40px; border:1px solid rgba(239,68,68,0.2); border-radius:16px; background:rgba(239,68,68,0.03); min-height:320px; justify-content:center;">
+        <div style="font-size:72px; position:relative;">
+          📡
+          <div style="position:absolute; top:-5px; right:-10px; font-size:28px; color:var(--red);">✕</div>
+        </div>
+        <div class="rajdhani bold text-24 red">4G towers fail first.</div>
+        <div class="exo text-14 muted text-center" style="max-width:300px;">
+          During every major flood in India, cellular infrastructure fails within the first 30 minutes.
+        </div>
+      </div>
+
+      <!-- RIGHT: ACN active -->
+      <div class="col gap-md items-center flex-1" style="padding:40px; border:1px solid rgba(16,185,129,0.2); border-radius:16px; background:rgba(16,185,129,0.03); min-height:320px; justify-content:center;">
+        <div style="font-size:72px;">🛡</div>
+        <div class="rajdhani bold text-24 green">ARGUS kept alerting.</div>
+        <div style="padding:12px 24px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:8px; margin-top:8px;">
+          <span class="rajdhani bold text-18" style="color:var(--emerald);">OFFLINE — ORACLE ACTIVE</span>
+        </div>
+        <div class="exo text-14 muted text-center" style="max-width:300px;">
+          ACN crisis nodes run village-personalized AI on ₹5,000 hardware. Autonomous. Resilient.
+        </div>
+      </div>
+    </div>
+
+    <div style="padding:20px 48px; background:rgba(0,201,255,0.04); border:1px solid rgba(0,201,255,0.12); border-radius:12px;">
+      <div class="exo text-18 white text-center">
+        &lt; <span class="accent bold">4 seconds</span>: Detection → Siren → Voice call → Cell Broadcast
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">9 / 14</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 10 — EVACUATION CHOREOGRAPHY                         -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s10">
+  <div class="grid-bg"></div>
+
+  <div class="col gap-lg items-center w-full" style="z-index:1; max-width:1500px;">
+    <div class="rajdhani bold text-36 accent">Evacuation Choreography</div>
+    <div class="exo text-18 muted">Every person has a seat, a route, and a shelter — 78 minutes before impact.</div>
+
+    <div style="width:100%; height:480px; background:rgba(0,201,255,0.03); border:1px solid rgba(0,201,255,0.12); border-radius:16px; position:relative; overflow:hidden;">
+      <!-- Map placeholder -->
+      <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center;">
+        <div style="font-size:120px; opacity:0.15;">🗺</div>
+      </div>
+
+      <!-- Overlay: Ward info -->
+      <div style="position:absolute; top:20px; right:20px; padding:16px 24px; background:var(--panel); border:1px solid rgba(0,201,255,0.25); border-radius:12px;">
+        <div class="rajdhani bold text-24 accent">2,340 people · Ward 7</div>
+        <div class="exo text-14 muted">Majuli Island, Assam</div>
+      </div>
+
+      <!-- Overlay: Bus -->
+      <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); padding:16px 24px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:12px;">
+        <div class="row gap-md items-center">
+          <span style="font-size:36px;">🚌</span>
+          <div>
+            <div class="rajdhani bold text-18 green">Bus AS-01</div>
+            <div class="exo text-14 muted">Capacity: 45 · Status: En Route</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overlay: Route -->
+      <div style="position:absolute; bottom:20px; left:20px; right:20px; padding:16px 24px; background:var(--panel); border:1px solid rgba(0,201,255,0.2); border-radius:12px;">
+        <div class="row justify-between items-center">
+          <div>
+            <div class="exo text-14 white">Route: <span class="accent">NH-715 → SH-23</span></div>
+            <div class="exo text-14 muted">Closes: 03:12 UTC · Depart by: 02:45 UTC</div>
+          </div>
+          <div style="padding:10px 20px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.25); border-radius:10px;">
+            <div class="rajdhani bold text-18 green">🏥 Jorhat Hall</div>
+            <div class="exo text-14 muted">Capacity: 0/400 available</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">10 / 14</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 11 — FLOODLEDGER (Revenue)                           -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s11">
+  <div class="grid-bg"></div>
+
+  <div class="col gap-lg items-center w-full" style="z-index:1; max-width:1500px;">
+    <div class="rajdhani bold text-36 accent">Climate Infrastructure That Funds Itself</div>
+
+    <div class="row gap-xl items-center w-full">
+      <!-- LEFT: Flow diagram -->
+      <div class="col gap-md items-center flex-1">
+        <div class="flow-step">🛰 Satellite Confirms Flood</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">📜 Smart Contract Fires</div>
+        <div class="flow-arrow">↓</div>
+        <div class="flow-step">💰 Payout Executes</div>
+        <div class="exo text-14 muted" style="margin-top:12px;">No adjuster · No delay · No dispute</div>
+      </div>
+
+      <!-- RIGHT: Numbers -->
+      <div class="col gap-lg items-center flex-1">
+        <div class="stat-box green-box" style="min-width:320px;">
+          <div class="rajdhani bold text-48 green">₹14.7L</div>
+          <div class="exo text-14 muted">Example payout triggered</div>
+        </div>
+        <div class="stat-box" style="min-width:320px;">
+          <div class="rajdhani bold text-48 accent">₹4L</div>
+          <div class="exo text-14 muted">Insurance processing saved per claim</div>
+        </div>
+        <div class="stat-box green-box" style="min-width:320px;">
+          <div class="rajdhani bold text-48 green">34%</div>
+          <div class="exo text-14 muted">Damage reduction from causal intervention</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">11 / 14</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 12 — COMPETITIVE MATRIX                              -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s12">
+  <div class="grid-bg"></div>
+
+  <div class="col gap-lg items-center w-full" style="z-index:1; max-width:1500px;">
+    <div class="rajdhani bold text-36 accent">Competitive Landscape</div>
+
+    <table class="table-clean">
+      <thead>
+        <tr>
+          <th style="text-align:left;">Capability</th>
+          <th>FFGS</th>
+          <th>Google FloodHub</th>
+          <th>IBM EWS</th>
+          <th>Typical Hackathon</th>
+          <th style="color:var(--cyan);">ARGUS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="text-align:left; color:var(--white);">CV Virtual Gauging</td>
+          <td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+          <td class="argus-col">✅ YOLO+SAM2</td>
+        </tr>
+        <tr>
+          <td style="text-align:left; color:var(--white);">Causal Intervention</td>
+          <td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+          <td class="argus-col">✅ GNN do-calculus</td>
+        </tr>
+        <tr>
+          <td style="text-align:left; color:var(--white);">Offline Edge AI</td>
+          <td>❌</td><td>❌</td><td>Partial</td><td>❌</td>
+          <td class="argus-col">✅ ACN Mesh</td>
+        </tr>
+        <tr>
+          <td style="text-align:left; color:var(--white);">Community NLP</td>
+          <td>❌</td><td>❌</td><td>❌</td><td>Basic</td>
+          <td class="argus-col">✅ 12 languages</td>
+        </tr>
+        <tr>
+          <td style="text-align:left; color:var(--white);">Parametric Insurance</td>
+          <td>❌</td><td>❌</td><td>❌</td><td>❌</td>
+          <td class="argus-col">✅ FloodLedger</td>
+        </tr>
+        <tr>
+          <td style="text-align:left; color:var(--white);">Lead Time</td>
+          <td>1–6 hr</td><td>7 days (coarse)</td><td>12–24 hr</td><td>N/A</td>
+          <td class="argus-col">✅ 78 min (precise)</td>
+        </tr>
+        <tr>
+          <td style="text-align:left; color:var(--white);">New Hardware</td>
+          <td>₹3L/sensor</td><td>None</td><td>₹50L+ infra</td><td>None</td>
+          <td class="argus-col">✅ ₹0</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="exo text-18 white text-center" style="margin-top:8px;">
+      ARGUS is not an incremental improvement. It is a <span class="accent bold">new category</span>.
+    </div>
+  </div>
+  <span class="slide-num">12 / 14</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 13 — MARKET & ROADMAP                                -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s13">
+  <div class="grid-bg"></div>
+
+  <div class="col gap-lg items-center w-full" style="z-index:1; max-width:1500px;">
+    <div class="rajdhani bold text-36 accent">Market &amp; Roadmap</div>
+
+    <div class="row gap-xl items-start w-full">
+      <!-- LEFT: Revenue circles -->
+      <div class="col gap-lg items-center flex-1" style="padding-top:16px;">
+        <div class="rajdhani bold text-24 white">Revenue Model</div>
+        <div class="row gap-md">
+          <div class="revenue-circle">
+            <div class="amount">B2G SaaS</div>
+            <div class="type">State disaster mgmt subscription</div>
+          </div>
+          <div class="revenue-circle">
+            <div class="amount">API</div>
+            <div class="type">FloodLedger insurance oracle</div>
+          </div>
+          <div class="revenue-circle">
+            <div class="amount">Data</div>
+            <div class="type">Risk data licensing to reinsurers</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Timeline -->
+      <div class="col flex-1" style="padding-top:16px;">
+        <div class="rajdhani bold text-24 white text-center" style="margin-bottom:24px;">3-Year Path</div>
+        <div class="timeline-item">
+          <div class="year">Year 1</div>
+          <div class="goal">3 Indian states · 2 insurance pilots · ₹2Cr grant</div>
+        </div>
+        <div class="timeline-item">
+          <div class="year">Year 2</div>
+          <div class="goal">South Asia expansion · ₹10Cr+ auto-processed claims</div>
+        </div>
+        <div class="timeline-item">
+          <div class="year">Year 3</div>
+          <div class="goal">20 countries · World Bank partnership · Series A</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-panel" style="border-radius:12px 12px 0 0;">
+      <div class="exo text-18 white">
+        India spends <span class="red bold">₹40,000 crore</span> on flood recovery annually.
+        ARGUS addresses the <span class="accent bold">cause</span>, not just the consequence.
+      </div>
+    </div>
+  </div>
+  <span class="slide-num">13 / 14</span>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- SLIDE 14 — CLOSING                                         -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="slide" id="s14">
+  <div class="col gap-md items-center text-center" style="z-index:1; max-width:1200px; line-height:2.2;">
+    <div class="exo text-24 white" style="opacity:0.7;">5,000 sensors broke under the mud.</div>
+    <div class="exo text-24 accent">ARGUS turned every camera into a gauge.</div>
+    <div style="height:12px;"></div>
+    <div class="exo text-24 white" style="opacity:0.7;">The towers fell.</div>
+    <div class="exo text-24 accent">The crisis nodes kept warning.</div>
+    <div style="height:12px;"></div>
+    <div class="exo text-24 white" style="opacity:0.7;">The water hit.</div>
+    <div class="exo text-24 green">Every village had a plan.</div>
+    <div style="height:12px;"></div>
+    <div class="exo text-24 white" style="opacity:0.7;">The flood ended.</div>
+    <div class="exo text-24 green">MIRROR told the government which decision would have saved 44 lives.</div>
+    <div style="height:48px;"></div>
+    <div class="rajdhani bold text-48 accent" style="letter-spacing:4px;">
+      ARGUS cannot be blinded.
+    </div>
+  </div>
+  <span class="slide-num">14 / 14</span>
+</div>
+
+</div><!-- /deck -->
+
+<!-- ── Navigation dots ───────────────────────────────────────── -->
+<div class="nav" id="nav"></div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const nav = document.getElementById('nav');
+let current = 0;
+
+// Build nav dots
+slides.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => goTo(i);
+  dot.title = `Slide ${i + 1}`;
+  nav.appendChild(dot);
+});
+
+function goTo(n) {
+  slides[current].classList.remove('active');
+  nav.children[current].classList.remove('active');
+  current = ((n % slides.length) + slides.length) % slides.length;
+  slides[current].classList.add('active');
+  nav.children[current].classList.add('active');
+}
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ')      { e.preventDefault(); goTo(current + 1); }
+  else if (e.key === 'ArrowLeft')                     { e.preventDefault(); goTo(current - 1); }
+  else if (e.key === 'Home')                          { goTo(0); }
+  else if (e.key === 'End')                           { goTo(slides.length - 1); }
+  else if (e.key === 'f' || e.key === 'F11')          { e.preventDefault(); document.documentElement.requestFullscreen?.(); }
+});
+
+// Auto-scale to viewport
+function rescale() {
+  const sx = window.innerWidth / 1920;
+  const sy = window.innerHeight / 1080;
+  const s = Math.min(sx, sy);
+  document.getElementById('deck').style.setProperty('--scale', s);
+}
+window.addEventListener('resize', rescale);
+rescale();
+</script>
+</body>
+</html>

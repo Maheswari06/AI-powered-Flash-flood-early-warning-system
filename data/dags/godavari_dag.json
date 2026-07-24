@@ -1,0 +1,60 @@
+{
+  "dag_id": "godavari_v2",
+  "basin_id": "godavari_telangana",
+  "version": "2.0.0",
+  "nodes": [
+    {
+      "node_id": "rainfall_upstream",
+      "variable": "rainfall_upstream",
+      "node_type": "OBSERVABLE",
+      "unit": "mm/hr",
+      "default_value": 0.0
+    },
+    {
+      "node_id": "godavari_level_bhadrachalam",
+      "variable": "godavari_level_bhadrachalam",
+      "node_type": "OBSERVABLE",
+      "unit": "m",
+      "default_value": 2.5
+    },
+    {
+      "node_id": "sriram_sagar_gate",
+      "variable": "sriram_sagar_gate",
+      "node_type": "INTERVENTION",
+      "unit": "fraction_open",
+      "default_value": 0.5,
+      "min_value": 0.0,
+      "max_value": 1.0
+    },
+    {
+      "node_id": "delta_flood_depth",
+      "variable": "delta_flood_depth",
+      "node_type": "OUTCOME",
+      "unit": "m",
+      "default_value": 0.0
+    }
+  ],
+  "edges": [
+    {
+      "source": "rainfall_upstream",
+      "target": "godavari_level_bhadrachalam",
+      "weight": 0.75,
+      "lag_minutes": 60,
+      "mechanism": "meteorological"
+    },
+    {
+      "source": "sriram_sagar_gate",
+      "target": "delta_flood_depth",
+      "weight": 0.65,
+      "lag_minutes": 180,
+      "mechanism": "anthropogenic"
+    },
+    {
+      "source": "godavari_level_bhadrachalam",
+      "target": "delta_flood_depth",
+      "weight": 0.88,
+      "lag_minutes": 90,
+      "mechanism": "hydrological"
+    }
+  ]
+}

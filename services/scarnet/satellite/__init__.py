@@ -1,0 +1,1 @@
+"""ScarNet satellite client module."""

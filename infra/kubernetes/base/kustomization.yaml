@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argus-prod
+
+commonLabels:
+  project: argus
+  managed-by: kustomize
+
+resources:
+  - namespace-and-config.yaml
+  - external-secrets.yaml
+  - storage.yaml
+  - gateway-and-network.yaml
+  - phase1-services.yaml
+  - phase2-services.yaml
+  - phase3-services.yaml
+  - phase4-services.yaml

@@ -1,0 +1,311 @@
+# ╔══════════════════════════════════════════════════════════════════╗
+# ║  ARGUS — Prometheus Alerting Rules                              ║
+# ║  SLA Targets:                                                   ║
+# ║    • Prediction latency p95 < 50ms                             ║
+# ║    • Alert dispatch latency   < 30s                            ║
+# ║    • Village prediction gap   < 5min                           ║
+# ║    • CHORUS trust score       > 0.3                            ║
+# ║    • AWS monthly cost         < $500                           ║
+# ╚══════════════════════════════════════════════════════════════════╝
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: argus-sla-rules
+  namespace: argus-prod
+  labels:
+    app: argus
+    role: alert-rules
+    prometheus: argus
+spec:
+  groups:
+    # ═══════════════════════════════════════════════════════════════
+    # SLA: Prediction Latency
+    # ═══════════════════════════════════════════════════════════════
+    - name: argus.prediction.sla
+      interval: 30s
+      rules:
+        - alert: PredictionLatencyP95High
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(argus_prediction_latency_seconds_bucket{service="prediction"}[5m])) by (le)
+            ) > 0.050
+          for: 5m
+          labels:
+            severity: critical
+            team: hydra
+            sla: prediction-latency
+          annotations:
+            summary: "Prediction p95 latency exceeds 50ms SLA"
+            description: |
+              Prediction p95 latency is {{ $value | humanizeDuration }}.
+              SLA target: < 50ms. Investigate model serving or Kafka lag.
+            runbook_url: "https://docs.argus.flood.gov.in/runbook#prediction-latency"
+
+        - alert: PredictionLatencyP99High
+          expr: |
+            histogram_quantile(0.99,
+              sum(rate(argus_prediction_latency_seconds_bucket{service="prediction"}[5m])) by (le)
+            ) > 0.200
+          for: 5m
+          labels:
+            severity: warning
+            team: hydra
+          annotations:
+            summary: "Prediction p99 latency exceeds 200ms"
+            description: "p99 latency at {{ $value | humanizeDuration }}. Consider scaling pods."
+
+        - alert: PredictionErrorRateHigh
+          expr: |
+            sum(rate(argus_prediction_errors_total[5m]))
+            /
+            sum(rate(argus_prediction_requests_total[5m]))
+            > 0.05
+          for: 3m
+          labels:
+            severity: critical
+            team: hydra
+          annotations:
+            summary: "Prediction error rate exceeds 5%"
+            description: "Error rate: {{ $value | humanizePercentage }}. Check model health."
+
+    # ═══════════════════════════════════════════════════════════════
+    # SLA: Alert Dispatch Latency
+    # ═══════════════════════════════════════════════════════════════
+    - name: argus.alert-dispatch.sla
+      interval: 30s
+      rules:
+        - alert: AlertDispatchLatencyHigh
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(argus_alert_dispatch_latency_seconds_bucket{service="alert-dispatcher"}[5m])) by (le)
+            ) > 30
+          for: 3m
+          labels:
+            severity: critical
+            team: hydra
+            sla: alert-dispatch
+          annotations:
+            summary: "Alert dispatch p95 latency exceeds 30s SLA"
+            description: |
+              Alert dispatch p95 is {{ $value | humanizeDuration }}.
+              SLA target: < 30s. Check Twilio API, Kafka consumer lag.
+            runbook_url: "https://docs.argus.flood.gov.in/runbook#alert-dispatch"
+
+        - alert: AlertDeliveryFailureRate
+          expr: |
+            sum(rate(argus_alert_delivery_failures_total[10m]))
+            /
+            sum(rate(argus_alert_delivery_total[10m]))
+            > 0.10
+          for: 5m
+          labels:
+            severity: critical
+            team: hydra
+          annotations:
+            summary: "Alert delivery failure rate exceeds 10%"
+            description: "{{ $value | humanizePercentage }} of alerts failing. Twilio / SMS gateway issue."
+
+    # ═══════════════════════════════════════════════════════════════
+    # SLA: Village Prediction Coverage
+    # ═══════════════════════════════════════════════════════════════
+    - name: argus.village-coverage.sla
+      interval: 60s
+      rules:
+        - alert: VillagePredictionGapHigh
+          expr: |
+            (time() - argus_village_last_prediction_timestamp)
+            > 300
+          for: 2m
+          labels:
+            severity: critical
+            team: hydra
+            sla: village-coverage
+          annotations:
+            summary: "Village {{ $labels.village_id }} missing predictions > 5min"
+            description: |
+              Village {{ $labels.village_name }} ({{ $labels.district }})
+              has not received a prediction for {{ $value | humanizeDuration }}.
+              SLA target: < 5 minutes between predictions.
+            runbook_url: "https://docs.argus.flood.gov.in/runbook#village-gap"
+
+        - alert: VillageCoverageDropped
+          expr: |
+            count(argus_village_last_prediction_timestamp > (time() - 300))
+            /
+            count(argus_village_last_prediction_timestamp)
+            < 0.95
+          for: 5m
+          labels:
+            severity: warning
+            team: hydra
+          annotations:
+            summary: "Village prediction coverage below 95%"
+            description: "Only {{ $value | humanizePercentage }} of villages covered. Pipeline stall?"
+
+    # ═══════════════════════════════════════════════════════════════
+    # SLA: CHORUS Trust Scores
+    # ═══════════════════════════════════════════════════════════════
+    - name: argus.chorus-trust.sla
+      interval: 60s
+      rules:
+        - alert: CHORUSTrustBelowThreshold
+          expr: |
+            argus_chorus_trust_score{source_type=~"cwc|imd|cctv"} < 0.3
+          for: 10m
+          labels:
+            severity: warning
+            team: hydra
+            sla: chorus-trust
+          annotations:
+            summary: "CHORUS trust for {{ $labels.source_type }} below 0.3"
+            description: |
+              Source {{ $labels.source_id }} ({{ $labels.source_type }})
+              trust score: {{ $value }}. Threshold: 0.3.
+              Data quality degradation detected.
+            runbook_url: "https://docs.argus.flood.gov.in/runbook#chorus-trust"
+
+        - alert: CHORUSTrustAllSourcesLow
+          expr: |
+            avg(argus_chorus_trust_score) < 0.4
+          for: 15m
+          labels:
+            severity: critical
+            team: hydra
+          annotations:
+            summary: "Average CHORUS trust score critically low"
+            description: "System-wide average trust: {{ $value }}. Major data quality issue."
+
+    # ═══════════════════════════════════════════════════════════════
+    # SLA: Infrastructure Cost
+    # ═══════════════════════════════════════════════════════════════
+    - name: argus.cost.sla
+      interval: 3600s
+      rules:
+        - alert: AWSMonthlyCostExceeded
+          expr: |
+            argus_aws_estimated_monthly_cost_usd > 500
+          for: 1h
+          labels:
+            severity: warning
+            team: hydra
+            sla: cost-budget
+          annotations:
+            summary: "AWS estimated monthly cost exceeds $500 budget"
+            description: |
+              Estimated cost: ${{ $value }}/month.
+              Budget: $500/month. Review instance sizes and autoscaling.
+            runbook_url: "https://docs.argus.flood.gov.in/runbook#cost-control"
+
+    # ═══════════════════════════════════════════════════════════════
+    # Infrastructure Health
+    # ═══════════════════════════════════════════════════════════════
+    - name: argus.infrastructure
+      interval: 30s
+      rules:
+        - alert: KafkaConsumerLagHigh
+          expr: |
+            kafka_consumer_group_lag{group=~"argus-.*"}
+            > 1000
+          for: 5m
+          labels:
+            severity: warning
+            team: hydra
+          annotations:
+            summary: "Kafka consumer lag > 1000 for {{ $labels.group }}"
+            description: "Topic {{ $labels.topic }}: lag {{ $value }}. Scale consumers."
+
+        - alert: PodCrashLooping
+          expr: |
+            rate(kube_pod_container_status_restarts_total{namespace="argus-prod"}[15m])
+            * 60 * 15 > 3
+          for: 5m
+          labels:
+            severity: critical
+            team: hydra
+          annotations:
+            summary: "Pod {{ $labels.pod }} crash-looping"
+            description: "{{ $value }} restarts in 15 minutes."
+
+        - alert: PodMemoryPressure
+          expr: |
+            container_memory_working_set_bytes{namespace="argus-prod"}
+            / container_spec_memory_limit_bytes{namespace="argus-prod"}
+            > 0.90
+          for: 5m
+          labels:
+            severity: warning
+            team: hydra
+          annotations:
+            summary: "Pod {{ $labels.pod }} near memory limit ({{ $value | humanizePercentage }})"
+
+        - alert: TimescaleDBConnectionPoolExhausted
+          expr: |
+            pg_stat_activity_count{datname="argus_db"}
+            /
+            pg_settings_max_connections
+            > 0.85
+          for: 5m
+          labels:
+            severity: critical
+            team: hydra
+          annotations:
+            summary: "TimescaleDB connection pool at {{ $value | humanizePercentage }}"
+
+        - alert: RedisMemoryHigh
+          expr: |
+            redis_memory_used_bytes / redis_memory_max_bytes > 0.85
+          for: 10m
+          labels:
+            severity: warning
+            team: hydra
+          annotations:
+            summary: "Redis memory usage at {{ $value | humanizePercentage }}"
+
+    # ═══════════════════════════════════════════════════════════════
+    # Model Drift Detection
+    # ═══════════════════════════════════════════════════════════════
+    - name: argus.model-monitor
+      interval: 300s
+      rules:
+        - alert: ModelDriftDetected
+          expr: |
+            argus_model_drift_score{model=~"xgboost|tft|pinn"} > 0.15
+          for: 30m
+          labels:
+            severity: warning
+            team: hydra
+          annotations:
+            summary: "Drift detected in {{ $labels.model }} (score: {{ $value }})"
+            description: "Threshold: 0.15. Consider retraining via federated learning."
+
+        - alert: ModelAccuracyDegraded
+          expr: |
+            argus_model_rmse{model="xgboost", window="24h"} > 0.5
+          for: 1h
+          labels:
+            severity: critical
+            team: hydra
+          annotations:
+            summary: "XGBoost RMSE degraded to {{ $value }} (24h window)"
+            description: "Prediction quality below acceptable threshold. Trigger retrain."
+
+    # ═══════════════════════════════════════════════════════════════
+    # Storm Mode
+    # ═══════════════════════════════════════════════════════════════
+    - name: argus.storm-mode
+      interval: 60s
+      rules:
+        - alert: StormModeTriggered
+          expr: |
+            count(argus_village_alert_level == 3) >= 3
+          for: 0m
+          labels:
+            severity: critical
+            team: hydra
+            priority: P0
+          annotations:
+            summary: "STORM MODE: ≥3 villages in EMERGENCY level"
+            description: |
+              {{ $value }} villages at EMERGENCY level.
+              Auto-scaling to storm-mode minimums (10 replicas prediction/alerts).
+              Activating all-hands incident response.

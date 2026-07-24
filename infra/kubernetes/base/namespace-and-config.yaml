@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argus-prod
+  labels:
+    app.kubernetes.io/part-of: argus
+    environment: production
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argus-config
+  namespace: argus-prod
+data:
+  kafka_bootstrap_servers: "argus-kafka-bootstrap:9092"
+  timescale_host: "argus-timescaledb-prod.cluster.local"
+  timescale_port: "5432"
+  timescale_db: "argus_db"
+  redis_url: "redis://argus-redis-prod:6379/0"
+  demo_mode: "false"
+  log_level: "INFO"
+  service_host: "0.0.0.0"
+  # Feature Engine
+  feature_window_1h: "12"
+  feature_window_3h: "36"
+  feature_window_6h: "72"
+  feature_window_24h: "288"
+  # Prediction
+  shap_top_k: "5"
+  feature_poll_interval_sec: "60"
+  tft_enabled: "true"
+  # CHORUS
+  whisper_model_size: "base"
+  geohash_precision: "5"
+  chorus_consensus_threshold: "3"
+  # Causal
+  n_monte_carlo: "200"
+  # Gateway
+  gateway_cache_ttl: "30"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argus-storm-mode
+  namespace: argus-prod
+  annotations:
+    description: "Applied by StormModeController when >= 3 villages in EMERGENCY"
+data:
+  prediction_replicas: "10"
+  causal_replicas: "3"
+  alert_dispatcher_replicas: "8"
+  chorus_replicas: "6"
+  kafka_partitions: "16"

@@ -1,0 +1,316 @@
+/* ── presentation.css — Dashboard polish & presentation mode ── */
+
+/* ── Google Fonts ─────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Exo+2:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+/* ── ARGUS Design Tokens (CSS custom properties) ──────── */
+:root {
+  --argus-navy:        #050d1a;
+  --argus-navy-light:  #0c1a2e;
+  --argus-navy-mid:    #132240;
+  --argus-cyan:        #00c9ff;
+  --argus-cyan-dim:    #00c9ff33;
+  --argus-green:       #22c55e;
+  --argus-amber:       #f59e0b;
+  --argus-red:         #ef4444;
+  --argus-red-deep:    #dc2626;
+  --argus-white:       #f1f5f9;
+  --argus-gray:        #94a3b8;
+  --argus-glass:       rgba(12, 26, 46, 0.85);
+  --argus-glass-solid: rgba(5, 13, 26, 0.95);
+  --font-code:         'JetBrains Mono', monospace;
+}
+
+/* ── Ticker animation (scrolling metrics bar) ─────────── */
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-ticker {
+  animation: ticker 30s linear infinite;
+}
+
+/* ── Slide-up entrance ────────────────────────────────── */
+@keyframes slideUp {
+  0%   { opacity: 0; transform: translateY(24px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── Staggered slide-up delays ────────────────────────── */
+.slide-delay-1 { animation-delay: 0.05s; }
+.slide-delay-2 { animation-delay: 0.10s; }
+.slide-delay-3 { animation-delay: 0.15s; }
+.slide-delay-4 { animation-delay: 0.20s; }
+.slide-delay-5 { animation-delay: 0.25s; }
+.slide-delay-6 { animation-delay: 0.30s; }
+
+/* ── Emergency pulse (red glow) ───────────────────────── */
+@keyframes emergencyPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  50%      { box-shadow: 0 0 30px 12px rgba(239, 68, 68, 0.25); }
+}
+.animate-emergency-pulse {
+  animation: emergencyPulse 1.5s ease-in-out infinite;
+}
+
+/* ── Glow breathe (cyan gentle pulse) ─────────────────── */
+@keyframes glowBreathe {
+  0%, 100% { box-shadow: 0 0 8px 2px var(--argus-cyan-dim); }
+  50%      { box-shadow: 0 0 20px 6px var(--argus-cyan-dim); }
+}
+.animate-glow-breathe {
+  animation: glowBreathe 3s ease-in-out infinite;
+}
+
+/* ── Fade-in ──────────────────────────────────────────── */
+@keyframes fadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out both;
+}
+
+/* ── Spin slow (for loading indicators) ───────────────── */
+@keyframes spinSlow {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spinSlow 3s linear infinite;
+}
+
+/* ── Lives counter (large impact number) ──────────────── */
+.lives-counter {
+  font-family: var(--font-code);
+  font-weight: 700;
+  font-size: 3rem;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--argus-cyan), var(--argus-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.lives-counter-xl {
+  font-family: var(--font-code);
+  font-weight: 700;
+  font-size: 5rem;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--argus-cyan), var(--argus-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Status dots ──────────────────────────────────────── */
+.status-healthy {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--argus-green);
+  box-shadow: 0 0 6px var(--argus-green);
+}
+.status-degraded {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--argus-amber);
+  animation: emergencyPulse 2s ease-in-out infinite;
+}
+.status-offline {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--argus-red);
+  animation: emergencyPulse 1.5s ease-in-out infinite;
+}
+.status-unknown {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--argus-gray);
+}
+
+/* ── Presentation mode overlay ────────────────────────── */
+.presentation-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: var(--argus-navy);
+  display: flex;
+  flex-direction: column;
+}
+
+.presentation-topbar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  background: var(--argus-glass-solid);
+  border-bottom: 1px solid rgba(0, 201, 255, 0.15);
+  flex-shrink: 0;
+}
+
+.presentation-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 32px;
+}
+
+.presentation-ticker {
+  height: 36px;
+  background: var(--argus-glass-solid);
+  border-top: 1px solid rgba(0, 201, 255, 0.1);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ── Moment progress dots ─────────────────────────────── */
+.moment-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.moment-dot.active {
+  background: var(--argus-cyan);
+  box-shadow: 0 0 10px var(--argus-cyan);
+  transform: scale(1.3);
+}
+.moment-dot.completed {
+  background: var(--argus-green);
+}
+.moment-dot.pending {
+  background: var(--argus-gray);
+  opacity: 0.4;
+}
+
+/* ── Glass card ───────────────────────────────────────── */
+.glass-card {
+  background: var(--argus-glass);
+  border: 1px solid rgba(0, 201, 255, 0.12);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+}
+
+.glass-card-accent {
+  background: var(--argus-glass);
+  border: 1px solid rgba(0, 201, 255, 0.25);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 0 20px rgba(0, 201, 255, 0.05);
+}
+
+/* ── Comparison slider ────────────────────────────────── */
+.comparison-slider {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  cursor: ew-resize;
+  user-select: none;
+}
+.comparison-slider .before-img,
+.comparison-slider .after-img {
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+.comparison-slider .before-img {
+  clip-path: inset(0 var(--clip-right, 50%) 0 0);
+}
+.comparison-slider .slider-handle {
+  position: absolute;
+  top: 0; bottom: 0;
+  left: var(--slider-pos, 50%);
+  width: 3px;
+  background: var(--argus-cyan);
+  box-shadow: 0 0 12px var(--argus-cyan);
+  z-index: 10;
+  transform: translateX(-50%);
+}
+.comparison-slider .slider-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--argus-navy);
+  border: 2px solid var(--argus-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: var(--argus-cyan);
+}
+
+/* ── Font utilities ───────────────────────────────────── */
+.font-code {
+  font-family: var(--font-code);
+}
+
+/* ── Terrain health bar ───────────────────────────────── */
+.terrain-health-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: linear-gradient(90deg,
+    var(--argus-red) 0%,
+    var(--argus-amber) 40%,
+    var(--argus-green) 100%
+  );
+  position: relative;
+}
+.terrain-health-bar .marker {
+  position: absolute;
+  top: -4px;
+  width: 4px; height: 16px;
+  background: white;
+  border-radius: 2px;
+  transform: translateX(-50%);
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
+/* ── Demo controller grid ─────────────────────────────── */
+.demo-moment-card {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 201, 255, 0.1);
+  background: var(--argus-glass);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.demo-moment-card:hover {
+  border-color: rgba(0, 201, 255, 0.3);
+  background: rgba(0, 201, 255, 0.05);
+}
+.demo-moment-card.active {
+  border-color: var(--argus-cyan);
+  background: rgba(0, 201, 255, 0.08);
+  box-shadow: 0 0 15px rgba(0, 201, 255, 0.1);
+}
+
+/* ── Intervention result card ─────────────────────────── */
+.intervention-result {
+  border-left: 3px solid var(--argus-cyan);
+  padding: 16px;
+  background: rgba(0, 201, 255, 0.04);
+  border-radius: 0 8px 8px 0;
+}
+
+/* ── System health grid ───────────────────────────────── */
+.health-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.health-service {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.02);
+  font-size: 11px;
+}

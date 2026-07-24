@@ -1,0 +1,14 @@
+# ── Staging Overlay ────────────────────────────────────────────────
+# Moderate resources, DEMO_MODE=false, single-AZ
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: argus-staging
+
+bases:
+  - ../../base
+
+namePrefix: staging-
+
+patchesStrategicMerge:
+  - config-patch.yaml

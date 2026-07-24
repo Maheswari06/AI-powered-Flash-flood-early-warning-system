@@ -1,0 +1,40 @@
+# platform/argus_sdk/examples/brahmaputra_bangladesh.yaml
+#
+# Bangladesh Brahmaputra (Jamuna) deployment
+# 48-hour upstream warning from ARGUS Assam
+
+basin_id: brahmaputra_bangladesh
+display_name: "Brahmaputra (Jamuna) — Bangladesh"
+country: Bangladesh
+state: "Dhaka Division"
+
+bbox: [88.0, 22.0, 92.7, 26.0]
+languages: [bn, en]
+
+data_sources:
+  rainfall: open_meteo
+  gauges: bwdb               # Bangladesh Water Development Board
+  satellite: copernicus
+
+monsoon_months: [6, 7, 8, 9, 10]
+flash_flood_hours: 6
+contact_authority: ffwc@bwdb.gov.bd
+
+causal_dag:
+  intervention_nodes:
+    - id: teesta_barrage_gate
+      description: Teesta Barrage gate control
+      valid_range: [0.0, 1.0]
+      downstream_lag_minutes: 180
+  upstream_signal:
+    source: argus_assam
+    station: BR_ASSAM_DHUBRI
+    lag_hours: 48
+
+insurance_partners:
+  - INSURER_GREEN_DELTA
+  - INSURER_PRAGATI
+
+floodledger_enabled: true
+chorus_enabled: true
+oracle_villages: auto

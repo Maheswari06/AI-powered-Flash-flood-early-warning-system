@@ -1,0 +1,34 @@
+{
+  "scenario_name": "majuli_flash_flood_aug2024",
+  "total_time_minutes": 120,
+  "flood_arrival_by_village": {
+    "majuli_ward_7": 45,
+    "majuli_ward_12": 60,
+    "kamalabari": 55,
+    "garamur": 75
+  },
+  "villages": [
+    {"id": "majuli_ward_7", "name": "Majuli Ward 7", "population": 2340, "lat": 27.0123, "lon": 94.5456, "risk_score": 0.91},
+    {"id": "majuli_ward_12", "name": "Majuli Ward 12", "population": 1680, "lat": 27.0234, "lon": 94.5567, "risk_score": 0.84},
+    {"id": "kamalabari", "name": "Kamalabari", "population": 1180, "lat": 27.0345, "lon": 94.5678, "risk_score": 0.77},
+    {"id": "garamur", "name": "Garamur", "population": 890, "lat": 27.0456, "lon": 94.5789, "risk_score": 0.68}
+  ],
+  "vehicles": [
+    {"id": "BUS_AS_01", "type": "bus", "capacity": 60, "depot_lat": 27.0600, "depot_lon": 94.5200, "avg_speed_kmh": 45},
+    {"id": "BUS_AS_02", "type": "bus", "capacity": 45, "depot_lat": 27.0600, "depot_lon": 94.5200, "avg_speed_kmh": 45},
+    {"id": "TRUCK_01", "type": "truck", "capacity": 80, "depot_lat": 27.0700, "depot_lon": 94.5300, "avg_speed_kmh": 35},
+    {"id": "BOAT_01", "type": "boat", "capacity": 25, "depot_lat": 27.0500, "depot_lon": 94.5100, "avg_speed_kmh": 20}
+  ],
+  "shelters": [
+    {"id": "jorhat_hall", "name": "Jorhat Community Hall", "lat": 26.7456, "lon": 94.2234, "capacity": 400},
+    {"id": "nimati_school", "name": "Nimati High School", "lat": 26.7867, "lon": 94.2567, "capacity": 250},
+    {"id": "golaghat_camp", "name": "Golaghat Relief Camp", "lat": 26.5123, "lon": 93.9678, "capacity": 600}
+  ],
+  "roads": [
+    {"id": "NH_715_N", "from": "depot", "to": "majuli_ward_7", "distance_km": 45, "closes_at_minutes": 67, "description": "NH-715 North Bridge"},
+    {"id": "SH_23", "from": "depot", "to": "kamalabari", "distance_km": 38, "closes_at_minutes": 55, "description": "SH-23 Kamalabari Road"},
+    {"id": "FR_12", "from": "depot", "to": "garamur", "distance_km": 52, "closes_at_minutes": 90, "description": "FR-12 Garamur Ferry"},
+    {"id": "NH_715_S", "from": "depot", "to": "majuli_ward_12", "distance_km": 41, "closes_at_minutes": 72, "description": "NH-715 South Approach"},
+    {"id": "BOAT_ROUTE", "from": "depot", "to": "kamalabari", "distance_km": 15, "closes_at_minutes": 120, "description": "Brahmaputra Boat Route"}
+  ]
+}

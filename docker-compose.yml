@@ -1,0 +1,438 @@
+# ── ARGUS — Docker Compose ────────────────────────────────
+# Phase 1: Kafka + Zookeeper + all microservices
+
+version: "3.9"
+
+services:
+  # ── Infrastructure ─────────────────────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: argus_kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+  # ── Rogesh — Ingestion Pipeline ────────────────────────
+  ingestion:
+    build:
+      context: .
+      dockerfile: services/ingestion/Dockerfile
+    ports:
+      - "8001:8001"
+    env_file: .env
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SERVICE_HOST: "0.0.0.0"
+    depends_on:
+      - kafka
+
+  # ── Rogesh — CV Virtual Gauging ────────────────────────
+  cv_gauging:
+    build:
+      context: .
+      dockerfile: services/cv_gauging/Dockerfile
+    ports:
+      - "8002:8002"
+    env_file: .env
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SERVICE_HOST: "0.0.0.0"
+    depends_on:
+      - kafka
+      - ingestion
+
+  # ── TimescaleDB (PostgreSQL + TimescaleDB extension) ───
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: argus_timescaledb
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: argus
+      POSTGRES_PASSWORD: argus
+      POSTGRES_DB: argus_db
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+
+  # ── Sabarish — Feature Engine ──────────────────────────
+  feature_engine:
+    build:
+      context: .
+      dockerfile: services/feature_engine/Dockerfile
+    ports:
+      - "8003:8003"
+    env_file: .env
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      TIMESCALEDB_DSN: postgresql://argus:argus@timescaledb:5432/argus
+      PINN_CHECKPOINT_PATH: ./models/pinn_beas_river.pt
+      SERVICE_HOST: "0.0.0.0"
+    depends_on:
+      - kafka
+      - ingestion
+      - timescaledb
+
+  # ── Redis (prediction cache) ────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: argus_redis
+    ports:
+      - "6379:6379"
+
+  # ── Sabarish — Prediction ──────────────────────────────
+  prediction:
+    build:
+      context: .
+      dockerfile: services/prediction/Dockerfile
+    ports:
+      - "8004:8004"
+    env_file: .env
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      TIMESCALE_URL: postgresql://argus:argus@timescaledb:5432/argus
+      REDIS_URL: redis://redis:6379/0
+      XGBOOST_MODEL_PATH: ./models/xgboost_flood.joblib
+      TRAINING_DATA_PATH: ./data/cwc_historical_2019_2023.csv
+      TRAIN_ON_STARTUP: "true"
+      FEATURE_POLL_INTERVAL_SEC: "60"
+      TFT_ENABLED: "true"
+      TFT_CHECKPOINT_PATH: ./models/tft_flood.ckpt
+      SERVICE_HOST: "0.0.0.0"
+    depends_on:
+      - kafka
+      - feature_engine
+      - timescaledb
+      - redis
+
+  # ── Dhana — Alert Dispatcher ───────────────────────────
+  alert_dispatcher:
+    build:
+      context: .
+      dockerfile: services/alert_dispatcher/Dockerfile
+    ports:
+      - "8005:8005"
+    env_file: .env
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SERVICE_HOST: "0.0.0.0"
+    depends_on:
+      - kafka
+      - prediction
+
+  # ── Rogesh — Causal Engine (Phase 2) ───────────────────
+  causal_engine:
+    build:
+      context: .
+      dockerfile: services/causal_engine/Dockerfile
+    ports:
+      - "8006:8006"
+    env_file: .env
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      CAUSAL_ENGINE_PORT: "8006"
+      CAUSAL_DAG_CONFIG_PATH: ./data/dags/brahmaputra_dag.json
+      CAUSAL_GNN_MODEL_PATH: ./models/causal_gnn_brahmaputra.pt
+      DEMO_MODE: "true"
+      SERVICE_HOST: "0.0.0.0"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    depends_on:
+      - kafka
+      - prediction
+
+  # ── Rogesh — FloodLedger Oracle (Phase 2) ──────────────
+  flood_ledger:
+    build:
+      context: .
+      dockerfile: services/flood_ledger/Dockerfile
+    ports:
+      - "8007:8007"
+    env_file: .env
+    environment:
+      FLOOD_LEDGER_PORT: "8007"
+      DEMO_MODE: "true"
+      HARDHAT_RPC_URL: http://localhost:8545
+      ASSET_REGISTRY_PATH: ./data/insured_assets.csv
+      SERVICE_HOST: "0.0.0.0"
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - kafka
+
+  # ── Sabarish — Model Monitor (Phase 3) ──────────────────
+  model_monitor:
+    build:
+      context: .
+      dockerfile: services/model_monitor/Dockerfile
+    ports:
+      - "8013:8013"
+    env_file: .env
+    environment:
+      MODEL_MONITOR_PORT: "8013"
+      DEMO_MODE: "true"
+      SERVICE_HOST: "0.0.0.0"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    depends_on:
+      - prediction
+
+  # ── Sabarish — CHORUS Community Intelligence ────────────
+  chorus:
+    build:
+      context: .
+      dockerfile: services/chorus/Dockerfile
+    ports:
+      - "8008:8008"
+    env_file: .env
+    environment:
+      SERVICE_HOST: "0.0.0.0"
+      CHORUS_PORT: "8008"
+      REDIS_URL: redis://redis:6379/1
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      WHISPER_MODEL_SIZE: base
+      INDIC_BERT_CHECKPOINT: ai4bharat/indic-bert
+      GEOHASH_PRECISION: "5"
+      CHORUS_CONSENSUS_THRESHOLD: "3"
+    depends_on:
+      - kafka
+      - redis
+
+  # ── Phase 2: Sabarish — Federated Learning Server ──────
+  federated_server:
+    build:
+      context: .
+      dockerfile: services/federated_server/Dockerfile
+    ports:
+      - "8009:8009"
+      - "8080:8080"
+    env_file: .env
+    environment:
+      SERVICE_HOST: "0.0.0.0"
+      FL_SERVER_PORT: "8009"
+      FLOWER_SERVER_ADDRESS: "0.0.0.0:8080"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DP_NOISE_MULTIPLIER: "1.1"
+      DP_CLIP_NORM: "1.0"
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - kafka
+
+  # ── Dhana — Evacuation RL ───────────────────────────────
+  evacuation_rl:
+    build:
+      context: .
+      dockerfile: services/evacuation_rl/Dockerfile
+    ports:
+      - "8010:8010"
+    env_file: .env
+    environment:
+      SERVICE_HOST: "0.0.0.0"
+      EVAC_RL_PORT: "8010"
+    depends_on:
+      - kafka
+
+  # ── Dhana — MIRROR Counterfactual Replay ────────────────
+  mirror:
+    build:
+      context: .
+      dockerfile: services/mirror/Dockerfile
+    ports:
+      - "8011:8011"
+    env_file: .env
+    environment:
+      SERVICE_HOST: "0.0.0.0"
+      MIRROR_PORT: "8011"
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - kafka
+
+  # ── Rogesh — ScarNet Terrain Monitor ────────────────────
+  scarnet:
+    build:
+      context: .
+      dockerfile: services/scarnet/Dockerfile
+    ports:
+      - "8012:8012"
+    env_file: .env
+    environment:
+      SERVICE_HOST: "0.0.0.0"
+      SCARNET_PORT: "8012"
+      SCARNET_DEMO_MODE: "true"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    depends_on:
+      - kafka
+
+  # ── Rogesh — API Gateway ────────────────────────────────
+  api_gateway:
+    build:
+      context: .
+      dockerfile: services/api_gateway/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      SERVICE_HOST: "0.0.0.0"
+      GATEWAY_PORT: "8000"
+      GATEWAY_CACHE_TTL: "30"
+    depends_on:
+      - ingestion
+      - cv_gauging
+      - feature_engine
+      - prediction
+      - alert_dispatcher
+      - chorus
+      - evacuation_rl
+      - mirror
+      - scarnet
+
+  # ── Dhana — Dashboard ─────────────────────────────────
+  dashboard:
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
+    ports:
+      - "3000:3000"
+    env_file: .env
+    depends_on:
+      - prediction
+      - feature_engine
+      - causal_engine
+      - flood_ledger
+      - chorus
+      - evacuation_rl
+      - mirror
+      - scarnet
+      - api_gateway
+
+  # ── Dhana — Notification Hub (Phase 5) ───────────────────
+  notification_hub:
+    build:
+      context: .
+      dockerfile: services/notification_hub/Dockerfile
+    ports:
+      - "8014:8014"
+    env_file: .env
+    environment:
+      SERVICE_HOST: "0.0.0.0"
+      NOTIFICATION_HUB_PORT: "8014"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      REDIS_URL: redis://redis:6379/3
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+    depends_on:
+      - kafka
+      - redis
+
+  # ── Dhana — Multi-Basin Manager (Phase 5) ───────────────
+  multi_basin:
+    build:
+      context: .
+      dockerfile: services/multi_basin/Dockerfile
+    ports:
+      - "8015:8015"
+    env_file: .env
+    environment:
+      SERVICE_HOST: "0.0.0.0"
+      MULTI_BASIN_PORT: "8015"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      REDIS_URL: redis://redis:6379/4
+    depends_on:
+      - kafka
+      - redis
+      - prediction
+
+  # ── Monitoring — Prometheus ─────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: argus_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./infra/monitoring/prometheus_rules.yml:/etc/prometheus/rules.yml
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
+
+  # ── Monitoring — Grafana ────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.0
+    container_name: argus_grafana
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: argus
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./infra/monitoring/grafana_dashboard.json:/var/lib/grafana/dashboards/argus.json
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+  # ── MLflow Experiment Tracking ──────────────────────────
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.12.1
+    container_name: argus_mlflow
+    ports:
+      - "5000:5000"
+    environment:
+      - MLFLOW_TRACKING_URI=postgresql://argus:argus_secure_2024@timescaledb:5432/mlflow
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+    command: >
+      mlflow server
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri postgresql://argus:argus_secure_2024@timescaledb:5432/mlflow
+      --default-artifact-root /mlflow/artifacts
+    volumes:
+      - mlflow_data:/mlflow
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── Hardhat Local Blockchain ─────────────────────────────
+  hardhat:
+    image: node:18-slim
+    container_name: argus_hardhat
+    working_dir: /app
+    command: npx hardhat node --hostname 0.0.0.0
+    ports:
+      - "8545:8545"
+    volumes:
+      - ./services/flood_ledger:/app
+
+volumes:
+  timescale_data:
+  prometheus_data:
+  grafana_data:
+  mlflow_data:

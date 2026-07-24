@@ -1,0 +1,1 @@
+"""ScarNet API routes module."""

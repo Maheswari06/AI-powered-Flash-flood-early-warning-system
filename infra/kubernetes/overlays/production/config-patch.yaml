@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argus-config
+  namespace: argus-prod
+data:
+  kafka_bootstrap_servers: "b-1.argus-msk.kafka.ap-south-1.amazonaws.com:9092,b-2.argus-msk.kafka.ap-south-1.amazonaws.com:9092,b-3.argus-msk.kafka.ap-south-1.amazonaws.com:9092"
+  timescale_host: "argus-timescale.cluster-xyz.ap-south-1.rds.amazonaws.com"
+  redis_url: "redis://argus-redis.abc123.0001.aps1.cache.amazonaws.com:6379"
+  demo_mode: "false"
+  tft_enabled: "true"
+  log_level: "WARNING"
+  environment: "production"

@@ -1,0 +1,32 @@
+{
+  "stations": {
+    "CWC-HP-MANDI": {
+      "name": "Mandi",
+      "river": "Beas",
+      "lat": 31.71,
+      "lon": 76.93,
+      "camera_id": "CAM-BEAS-01"
+    },
+    "CWC-HP-PANDOH": {
+      "name": "Pandoh Dam",
+      "river": "Beas",
+      "lat": 31.67,
+      "lon": 77.06,
+      "camera_id": "CAM-BEAS-02"
+    },
+    "CWC-HP-NADAUN": {
+      "name": "Nadaun",
+      "river": "Beas",
+      "lat": 31.78,
+      "lon": 76.34,
+      "camera_id": "CAM-BEAS-03"
+    },
+    "CWC-PB-PONG": {
+      "name": "Pong Dam",
+      "river": "Beas",
+      "lat": 31.97,
+      "lon": 75.95,
+      "camera_id": "CAM-BEAS-04"
+    }
+  }
+}
