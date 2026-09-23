@@ -358,3 +358,61 @@ These are specific codebase checks, not reasons to panic. Be ready to state them
 ### Best honest closing line
 
 “The project demonstrates the complete architecture and the core feature/prediction services. The current repository is a strong prototype/demo with production hardening still needed around live data, model artefacts, schema contracts, and message wiring. Those checks taught me exactly why reliability and validation matter in an ML system.”
+
+## Documentation Validation and Full Project Scope
+
+### What was checked
+
+This guide was cross-checked against `README.md`, `PROJECT_REPORT.md`, `ML_AI_MODELS.md`, `DOCUMENTATION.md`, `TECH_STACK.md`, the API/deployment/runbook documents, and the corresponding implementation files. When sources disagree, use this order in an interview:
+
+1. **Running code and configuration** — what this repository can actually do now.
+2. **README and Docker Compose** — the intended Phase-1 service contract.
+3. **Project report and deep-dive documents** — product vision, later phases, targets, and documented backtest/demo claims.
+
+That distinction matters because the report is broader than the checked-in runnable core.
+
+### Broader ARGUS capabilities — concise and accurate
+
+The resume-level story should centre on the first row below. If an interviewer asks about the full project, use the rest as a **phased architecture overview**, not as a claim that you personally built or production-deployed every module.
+
+| Layer / module | Intended role | Evidence and safe wording |
+|---|---|---|
+| **Phase 1: Ingestion, CV, Feature Engine, Prediction, Alerts** | Turns environmental observations into explainable risk and alerts. | Core service directories, Dockerfiles, APIs, and Compose entries exist. The live wiring has the contract gaps listed above. |
+| **TFT deep track** | Produces p10/p50/p90 multi-horizon risk forecasts at 15, 30, 45, 60, 90, and 120 minutes. | `TFTFloodPredictor` is integrated into the Prediction API, but no TFT checkpoint or `pytorch_forecasting` dependency is checked in; it falls back to a synthetic rising-limb curve. |
+| **Causal Engine** | Answers intervention questions such as “what happens if a dam gate is opened to x%?” using a basin DAG, GNN/SEM inference, and do-calculus-style APIs. | Service, DAG files, and intervention APIs exist. Model files are absent, so describe the GNN results as prototype/demo unless you have reproduced them. |
+| **CHORUS** | Ingests WhatsApp/citizen text or voice reports; transcribes, classifies, locates, assigns trust, and aggregates consensus signals. | FastAPI service and NLP/trust modules exist. Whisper/Indic model availability and real Twilio operation depend on optional dependencies/credentials. |
+| **Evacuation RL** | Converts warnings to vehicle, shelter, and route assignments while considering road closures and capacity. | `EvacuationAgent` selects a PPO checkpoint when available and a priority-based heuristic otherwise. No PPO checkpoint is checked in. |
+| **FloodLedger** | Records confirmed flood events and supports parametric-insurance logic through a local ledger/Hardhat integration. | Service and Solidity contract exist; production asset registry, contract address, and payout integration must be configured and verified. |
+| **MIRROR** | Replays historical scenarios and computes counterfactual “what if ARGUS existed?” comparisons with optional reports. | Replay/counterfactual modules and a Himachal demo path exist; treat quantitative life/damage estimates as documented scenario outputs, not independently validated facts. |
+| **ScarNet** | Uses Sentinel-2 imagery to detect terrain changes such as slope failure, deforestation, and channel shifts, then feeds terrain updates to PINN-related logic. | Service and demo scan paths exist; the U-Net checkpoint and real imagery credentials/data are not checked in. |
+| **Model Monitor + MLflow** | Measures drift (PSI/KS), exposes accuracy/retrain status, and can trigger retraining. | Drift utilities exist; the service defaults to precomputed demo reports and its real retraining path is still placeholder-oriented. |
+| **Federated Server** | Aggregates district model updates with FedAvg/FedProx-style logic and differential-privacy controls. | Server, Flower integration, and simulated nodes exist. Do not claim deployment across real districts without evidence. |
+| **Oracle v2 + ACN** | A small MobileFloodFormer model is designed for offline Raspberry Pi inference; ACN provides local sensing/cache/escalation behaviour. | Architecture/code exist, but the model artefact is absent. Describe the performance figures as design targets until benchmarked on hardware. |
+| **Dashboard, PWA, SDK, gateway, security and infrastructure** | React dashboard/PWA, API aggregation, SDK, audit/auth scaffolding, monitoring, Docker, Kubernetes, and Terraform provide the platform shell. | Source and manifests exist. Authentication and cloud deployment should be called “implemented scaffolding/configuration” unless you have run an authenticated production deployment. |
+
+### Documentation-versus-code reconciliation
+
+| Topic | What the documentation says | What the checked-in code supports | What to say instead |
+|---|---|---|---|
+| **XGBoost feature count** | `PROJECT_REPORT.md` says 47 features; `ML_AI_MODELS.md` and `DOCUMENTATION.md` say 16. | The active fast-track `XGBoostPredictor.FEATURES` list has **16** fields. | “The current fast-track model contract has 16 features; 47 is a broader/earlier report-level design.” |
+| **TFT horizon** | The report describes 168 timesteps and +1h to +24h. | The Prediction service exposes six 15–120 minute horizons and uses a synthetic fallback without checkpoint/dependency. | “The current API is a short-horizon prototype; the 24-hour TFT is the documented target.” |
+| **5 ms / model latency claims** | `ML_AI_MODELS.md` presents a five-millisecond end-to-end path; the report lists sub-500 ms XGBoost. | The active feature-to-prediction route writes to TimescaleDB and is polled every 60 seconds; no benchmark artifact verifies an end-to-end 5 ms path. | “Those are design/demo targets, not a validated latency SLA for this checkout.” |
+| **Accuracy/backtest numbers** | The report cites 94.2% +1h accuracy, F1 0.91, T-180 detection, and lives/damage estimates. | No historical training CSV, fitted model, backtest dataset, or reproducible result is checked in. | “The project report documents a backtest scenario; I would not present the metrics as independently reproduced.” |
+| **YOLOv11 + SAM-2** | Docs describe a real CV pipeline and accuracy/latency figures. | CV service returns simulated readings when demo mode is on or no YOLO model is loaded; SAM loading is explicitly a placeholder. | “The service contract/prototype is present; real CV model validation is pending in this checkout.” |
+| **PINN coverage and accuracy** | The report claims 1,673× coverage and specific virtual-gauge figures. | PINN training code exists, but no checkpoint is present and fallback is IDW plus a simplified physics correction. | “PINN-assisted virtual sensing is the design; current execution falls back without an artifact.” |
+| **Production deployment/SLA** | Runbook/report describe EKS, MSK, RDS, autoscaling, RPO/RTO, and SLAs. | Terraform/Kubernetes/monitoring files exist, but Compose uses one Kafka broker and the repository does not prove a deployed AWS environment. | “We prepared production infrastructure and operations runbooks; production deployment is the next validation stage.” |
+| **Demo mode** | Docs correctly describe a presentation-oriented demo that can work without live services. | Multiple services default to demo values/precomputed data. | “Demo mode is intentional for demonstrations; it is separate from live-data validation.” |
+
+### Strong full-project answer if asked beyond your resume bullet
+
+“ARGUS is organised in layers. The core layer turns gauge, weather, and optional camera data into explainable XGBoost risk scores. Above that, Phase 2 adds causal intervention analysis, citizen reports, evacuation planning, counterfactual replay, insurance logic, and federated learning; Phase 3 adds satellite terrain monitoring and model monitoring. The repository contains those modules and their demo flows, while the part I can defend in depth is the feature engineering and prediction integration. For a production rollout, I would validate real model artefacts, message contracts, performance, and the operational claims separately.”
+
+### Extra questions an interviewer may ask about the broader system
+
+**What is the difference between correlation-based prediction and the Causal Engine?**  XGBoost estimates risk from patterns in observed features. The Causal Engine is intended for intervention questions, such as changing a dam-gate setting, by following a domain DAG and simulating `do(X=x)` rather than only observing correlation. Its answers require careful domain validation because a causal graph is an assumption, not automatic proof of causality.
+
+**Why add a TFT when XGBoost already predicts risk?**  XGBoost is the fast tabular model for a current risk score. A TFT is intended to use longer sequential history and return several future quantiles, which is more useful for planning. In this checkout its model is not available, so the deep endpoint returns a synthetic fallback rather than a verified neural forecast.
+
+**How does CHORUS avoid acting on a single false citizen report?**  The design combines language analysis, location extraction, a credibility/trust score, and consensus from multiple reports before treating a signal as stronger evidence. It should be treated as supplemental evidence, not a replacement for hydrological sensors. Real-world deployment also needs consent, moderation, abuse prevention, and privacy controls.
+
+**How does the offline edge design help?**  The ACN/Oracle v2 design keeps a compact model, cached data, local alert escalation, and LoRa-style siren simulation at a community node. This reduces dependence on cloud connectivity during a disaster. The hardware performance numbers are targets until measured with the actual model on a Raspberry Pi.
